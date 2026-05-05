@@ -80,7 +80,14 @@ class ChargerSearchController extends Controller
 
             $startTime = $request->start_time ? \Carbon\Carbon::parse($request->start_time) : \Carbon\Carbon::now();
             $duration = (float) ($request->duration_hours ?? 1);
-            $endTime = $startTime->copy()->addHours($duration);
+            
+            \Illuminate\Support\Facades\Log::info('Estimate Request', [
+                'start_time' => $startTime->toIso8601String(),
+                'duration' => $duration,
+                'duration_type' => gettype($duration)
+            ]);
+
+            $endTime = $startTime->copy()->addMinutes((int)($duration * 60));
 
             $pricing = $this->pricingService->calculatePrice($charger, $startTime, $endTime);
 

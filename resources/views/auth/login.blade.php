@@ -1,451 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Secure Login- Driver & Host Platform</title>
+    <title>VoltCharge | Secure Login</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            position: relative;
+            color: var(--text-main);
         }
 
-        /* Role indicator badges */
-        .role-badge {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
-            color: #667eea;
-            font-weight: 500;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        .login-container {
+        .auth-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-radius: 40px;
             width: 100%;
-            max-width: 450px;
-            padding: 40px;
-            animation: fadeIn 0.5s ease-in;
+            max-width: 480px;
+            padding: 3.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .auth-logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: inline-block;
         }
 
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .form-label {
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
         }
 
-        .login-header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
+        .form-control {
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 18px;
+            padding: 0.9rem 1.2rem;
+            color: var(--text-main);
             font-weight: 500;
-            font-size: 14px;
+            transition: all 0.2s;
         }
 
-        .input-group {
-            position: relative;
+        .form-control:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            color: var(--text-main);
         }
 
-        input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s, box-shadow 0.3s;
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            border-radius: 18px;
+            padding: 1.1rem;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
         }
 
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.4);
         }
 
-        .toggle-password {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #999;
-            font-size: 14px;
-            user-select: none;
-        }
-
-        .checkbox-group {
+        .social-btn {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 0.85rem;
+            color: var(--text-main);
+            font-weight: 600;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-
-        .checkbox-group label {
-            display: flex;
-            align-items: center;
-            margin-bottom: 0;
-            cursor: pointer;
-        }
-
-        .checkbox-group input {
-            width: auto;
-            margin-right: 8px;
-        }
-
-        .forgot-password {
-            color: #667eea;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.2s;
             text-decoration: none;
-            font-size: 14px;
         }
 
-        .forgot-password:hover {
+        .social-btn:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: var(--primary);
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--text-muted);
+            margin: 2rem 0;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .divider:not(:empty)::before { margin-right: 1.25rem; }
+        .divider:not(:empty)::after { margin-left: 1.25rem; }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .auth-footer a:hover {
             text-decoration: underline;
         }
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+        .input-group-text {
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 18px 0 0 18px !important;
+            color: var(--text-muted);
+            padding-left: 1.25rem;
         }
 
-        button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
+        .form-control-with-icon {
+            border-radius: 0 18px 18px 0 !important;
         }
 
         .alert {
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(-10px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .register-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        /* Loading spinner */
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 0.6s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 30px 20px;
-            }
+            border-radius: 18px;
+            border: none;
+            padding: 1rem 1.25rem;
         }
     </style>
 </head>
-
 <body>
-    <div class="role-badge">
-        🚗 Driver | 🏠 Host | 👑 Admin
-    </div>
-
-    <div class="login-container">
-        <div class="login-header">
-            <h1>Welcome Back</h1>
-            <p>Please sign in to your account</p>
+    <div class="auth-card">
+        <div class="text-center mb-5">
+            <div class="auth-logo">VoltCharge</div>
+            <h2 class="fw-bold mt-2 h3">Welcome Back</h2>
+            <p class="text-muted small fw-medium">Sign in to manage your charging sessions</p>
         </div>
 
         @if(session('success'))
-            <div class="alert alert-success">
-                ✓ {{ session('success') }}
+            <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+                <i class="fas fa-circle-check"></i>
+                <div class="small fw-semibold">{{ session('success') }}</div>
             </div>
         @endif
 
-        @if(session('error'))
-            <div class="alert alert-error">
-                ✗ {{ session('error') }}
+        @if(session('error') || $errors->any())
+            <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+                <i class="fas fa-circle-exclamation"></i>
+                <div class="small fw-semibold">
+                    @if(session('error')) {{ session('error') }} @else Invalid email or password @endif
+                </div>
             </div>
         @endif
 
-        @if($errors->any())
-            <div class="alert alert-error">
-                @foreach($errors->all() as $error)
-                    ✗ {{ $error }}<br>
-                @endforeach
-            </div>
-        @endif
-
-        <form method="POST" action="{{ route('login.submit') }}" id="loginForm">
+        <form method="POST" action="{{ route('login.submit') }}">
             @csrf
 
-            <div class="form-group">
-                <label for="email">Email Address</label>
+            <div class="mb-4">
+                <label class="form-label">Email Address</label>
                 <div class="input-group">
-                    <input type="email" id="email" name="email" value="{{ old('email') }}" 
-                           placeholder="your@email.com" required autofocus>
+                    <span class="input-group-text">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" name="email" class="form-control form-control-with-icon" 
+                           value="{{ old('email') }}" placeholder="name@email.com" required autofocus>
                 </div>
-                @error('email')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
             </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <label class="form-label">Password</label>
+                    <a href="#" class="small text-primary text-decoration-none fw-bold mb-2" style="font-size: 0.75rem;">Forgot Password?</a>
+                </div>
                 <div class="input-group">
-                    <input type="password" id="password" name="password" placeholder="••••••••" required>
-                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                    <span class="input-group-text">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" name="password" class="form-control form-control-with-icon" 
+                           placeholder="••••••••" required>
                 </div>
-                @error('password')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
             </div>
 
-            <div class="checkbox-group">
-                <label>
-                    <input type="checkbox" name="remember" {{ old('remember') ? 'checked' : '' }}>
-                    Remember me
-                </label>
-                <a href="#" class="forgot-password" onclick="showForgotPassword()">Forgot password?</a>
+            <div class="mb-4 form-check d-flex align-items-center gap-2">
+                <input type="checkbox" name="remember" class="form-check-input mt-0" id="remember" 
+                       {{ old('remember') ? 'checked' : '' }} style="width: 20px; height: 20px; border-radius: 6px;">
+                <label class="form-check-label small text-muted fw-medium" for="remember">Remember this device</label>
             </div>
 
-            <button type="submit" id="loginBtn">Sign In</button>
+            <button type="submit" class="btn btn-primary w-100 py-3 mb-4 shadow-sm">
+                Sign In Now <i class="fas fa-arrow-right ms-2"></i>
+            </button>
+
+            <div class="divider">or continue with</div>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <a href="#" class="social-btn">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18" alt="Google">
+                        Sign in with Google
+                    </a>
+                </div>
+            </div>
         </form>
 
-        <div class="register-link">
-            Don't have an account? <a href="{{ route('register') }}">Create one</a>
+        <div class="auth-footer">
+            New to VoltCharge? <a href="{{ route('register') }}">Create an Account</a>
         </div>
     </div>
 
-    <script>
-        let loginAttempts = 0;
-        let lastAttemptTime = 0;
-        let lockoutTime = 0;
-
-        // Toggle password visibility
-        function togglePassword() {
-            const passwordInput = document.getElementById('password');
-            const toggleBtn = document.querySelector('.toggle-password');
-            
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                toggleBtn.textContent = '🙈';
-            } else {
-                passwordInput.type = 'password';
-                toggleBtn.textContent = '👁️';
-            }
-        }
-
-        // Show forgot password message
-        function showForgotPassword() {
-            alert('Please contact your administrator to reset your password.');
-        }
-
-        // Add input validation
-        document.getElementById('email').addEventListener('input', function(e) {
-            const email = e.target.value;
-            const emailError = document.querySelector('#email + .error-message');
-            
-            if (email && !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                if (!emailError) {
-                    const error = document.createElement('div');
-                    error.className = 'error-message';
-                    error.textContent = 'Please enter a valid email address';
-                    e.target.parentNode.parentNode.appendChild(error);
-                }
-            } else if (emailError) {
-                emailError.remove();
-            }
-        });
-
-        // Form submission with enhanced security
-        document.getElementById('loginForm').addEventListener('submit', function (e) {
-            const now = Date.now();
-            
-            // Check if account is locked
-            if (lockoutTime > now) {
-                e.preventDefault();
-                const remainingMinutes = Math.ceil((lockoutTime - now) / 60000);
-                alert(`Too many failed attempts. Please try again in ${remainingMinutes} minutes.`);
-                return false;
-            }
-            
-            // Prevent rapid form submissions
-            if (loginAttempts >= 5 && (now - lastAttemptTime) < 60000) {
-                e.preventDefault();
-                alert('Too many login attempts. Please wait a moment before trying again.');
-                return false;
-            }
-            
-            // Validate form before submission
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                e.preventDefault();
-                alert('Please enter both email and password.');
-                return false;
-            }
-            
-            // Disable button to prevent double submission
-            const btn = document.getElementById('loginBtn');
-            const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Signing in...';
-            
-            loginAttempts++;
-            lastAttemptTime = now;
-            
-            // Store lockout time if too many attempts
-            if (loginAttempts >= 10) {
-                lockoutTime = now + (30 * 60 * 1000); // 30 minutes lockout
-            }
-            
-            // Re-enable button after 5 seconds if no response
-            setTimeout(() => {
-                if (btn.disabled) {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
-            }, 5000);
-        });
-
-        // Auto-focus on email field
-        document.getElementById('email').focus();
-        
-        // Add enter key support
-        document.getElementById('password').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                document.getElementById('loginForm').dispatchEvent(new Event('submit'));
-            }
-        });
-
-        // Show demo credentials for testing (remove in production)
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            const demoHint = document.createElement('div');
-            demoHint.className = 'alert alert-info';
-            demoHint.style.marginTop = '20px';
-            demoHint.style.fontSize = '12px';
-            demoHint.innerHTML = '💡 Demo accounts:<br>' +
-                                'Admin: admin@example.com / password<br>' +
-                                'Driver: driver@example.com / password<br>' +
-                                'Host: host@example.com / password';
-            document.querySelector('.login-container').appendChild(demoHint);
-        }
-    </script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

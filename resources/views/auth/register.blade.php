@@ -1,350 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Create Account</title>
+    <title>VoltCharge | Create Account</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.05) 0px, transparent 50%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 40px 20px;
+            color: var(--text-main);
         }
 
-        .login-container {
+        .auth-card {
             background: white;
-            border-radius: 10px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border-radius: 40px;
             width: 100%;
-            max-width: 450px;
-            padding: 40px;
+            max-width: 520px;
+            padding: 3.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .auth-logo {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            display: inline-block;
         }
 
-        .login-header h1 {
-            color: #333;
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-
-        .login-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-
-        input,
-        select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.3s, box-shadow 0.3s;
-            font-family: inherit;
-        }
-
-        select {
-            cursor: pointer;
-            background-color: white;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
+        .form-label {
             font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.6rem;
+        }
+
+        .form-control, .form-select {
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 18px;
+            padding: 0.9rem 1.2rem;
+            color: var(--text-main);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            color: var(--text-main);
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        .role-option {
+            background: #f8fafc;
+            border: 2px solid transparent;
+            border-radius: 24px;
+            padding: 1.5rem 1rem;
+            text-align: center;
             cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: all 0.3s;
+            position: relative;
         }
 
-        button:hover {
+        .role-option:hover {
+            background: #f1f5f9;
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
-        button:active {
-            transform: translateY(0);
+        .role-option.active {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.15);
         }
 
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
+        .role-icon {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .role-name {
+            font-weight: 800;
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--text-main);
+        }
+
+        .role-desc {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            border: none;
+            border-radius: 18px;
+            padding: 1.1rem;
+            font-weight: 700;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(37, 99, 235, 0.4);
+        }
+
+        .auth-footer {
+            text-align: center;
+            margin-top: 2.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .auth-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+        }
+
+        .input-group-text {
+            background: #f1f5f9;
+            border: 2px solid transparent;
+            border-radius: 18px 0 0 18px !important;
+            color: var(--text-muted);
+            padding-left: 1.25rem;
+        }
+
+        .form-control-with-icon {
+            border-radius: 0 18px 18px 0 !important;
         }
 
         .alert {
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            font-size: 14px;
-        }
-
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .error-message {
-            color: #dc3545;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .help-text {
-            color: #6c757d;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        .register-link {
-            text-align: center;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-
-        .register-link a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .register-link a:hover {
-            text-decoration: underline;
-        }
-
-        .role-card {
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .role-card:hover {
-            border-color: #667eea;
-            background-color: #f8f9ff;
-        }
-
-        .role-card.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
-        }
-
-        .role-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .role-description {
-            font-size: 12px;
-            color: #666;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 30px 20px;
-            }
+            border-radius: 18px;
+            border: none;
         }
     </style>
 </head>
-
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <h1>Create Account</h1>
-            <p>Join us today to get started</p>
+    <div class="auth-card">
+        <div class="text-center mb-5">
+            <div class="auth-logo">VoltCharge</div>
+            <h2 class="fw-bold mt-2 h3">Create Account</h2>
+            <p class="text-muted small fw-medium">Join the premium EV charging network</p>
         </div>
 
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
         @if($errors->any())
-            <div class="alert alert-error">
-                @foreach($errors->all() as $error)
-                    {{ $error }}<br>
-                @endforeach
+            <div class="alert alert-danger d-flex align-items-center gap-2 mb-4">
+                <i class="fas fa-circle-exclamation"></i>
+                <div class="small fw-semibold">
+                    @foreach($errors->all() as $error)
+                        <div>{{ $error }}</div>
+                    @endforeach
+                </div>
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register.submit') }}" id="registerForm">
+        <form method="POST" action="{{ route('register.submit') }}">
             @csrf
 
-            <div class="form-group">
-                <label for="name">Full Name</label>
-                <input type="text" id="name" name="name" value="{{ old('name') }}" required autofocus>
-                @error('name')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" value="{{ old('email') }}" required>
-                @error('email')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
-            </div>
-
-            <!-- Role Selection -->
-            <div class="form-group">
-                <label>I want to register as</label>
-
-                <!-- Option 1: Stylish role cards -->
-                <div id="roleCards">
-                    <div class="role-card" data-role="driver">
-                        <div class="role-title">🚗 Driver</div>
-                        <div class="role-description">Drive and earn money by completing trips</div>
+            <div class="mb-4">
+                <label class="form-label">I want to register as...</label>
+                <div class="role-selector">
+                    <div class="role-option active" onclick="setRole('driver')">
+                        <span class="role-icon">🚗</span>
+                        <span class="role-name">Driver</span>
+                        <span class="role-desc">Find and book chargers easily</span>
                     </div>
-                    <div class="role-card" data-role="host">
-                        <div class="role-title">🏠 Host</div>
-                        <div class="role-description">Host events and manage your properties</div>
+                    <div class="role-option" onclick="setRole('host')">
+                        <span class="role-icon">🏠</span>
+                        <span class="role-name">Host</span>
+                        <span class="role-desc">List and manage your stations</span>
                     </div>
                 </div>
-
-                <!-- Hidden input for role selection -->
-                <input type="hidden" id="role" name="role" value="{{ old('role', 'driver') }}">
-
-                @error('role')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
+                <input type="hidden" name="role" id="role_input" value="driver">
             </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-                <div class="help-text">
-                    Password must be at least 8 characters with uppercase, lowercase, numbers, and symbols.
+            <div class="mb-4">
+                <label class="form-label">Full Name</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    <input type="text" name="name" class="form-control form-control-with-icon" 
+                           value="{{ old('name') }}" placeholder="Enter full name" required autofocus>
                 </div>
-                @error('password')
-                    <div class="error-message">{{ $message }}</div>
-                @enderror
             </div>
 
-            <div class="form-group">
-                <label for="password_confirmation">Confirm Password</label>
-                <input type="password" id="password_confirmation" name="password_confirmation" required>
+            <div class="mb-4">
+                <label class="form-label">Email Address</label>
+                <div class="input-group">
+                    <span class="input-group-text">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" name="email" class="form-control form-control-with-icon" 
+                           value="{{ old('email') }}" placeholder="name@email.com" required>
+                </div>
             </div>
 
-            <button type="submit" id="registerBtn">Create Account</button>
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" name="password" class="form-control form-control-with-icon" 
+                               placeholder="••••••••" required>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <label class="form-label">Confirm</label>
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-shield-halved"></i>
+                        </span>
+                        <input type="password" name="password_confirmation" class="form-control form-control-with-icon" 
+                               placeholder="••••••••" required>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-3 mb-2 shadow-sm">
+                Get Started for Free <i class="fas fa-rocket ms-2"></i>
+            </button>
         </form>
 
-        <div class="register-link">
-            Already have an account? <a href="{{ route('login') }}">Sign In</a>
+        <div class="auth-footer">
+            Already have an account? <a href="{{ route('login') }}">Sign In Instead</a>
         </div>
     </div>
 
     <script>
-        // Role selection with cards
-        const roleCards = document.querySelectorAll('.role-card');
-        const roleInput = document.getElementById('role');
-
-        roleCards.forEach(card => {
-            card.addEventListener('click', function () {
-                // Remove selected class from all cards
-                roleCards.forEach(c => c.classList.remove('selected'));
-
-                // Add selected class to clicked card
-                this.classList.add('selected');
-
-                // Update hidden input value
-                const role = this.getAttribute('data-role');
-                roleInput.value = role;
+        function setRole(role) {
+            document.getElementById('role_input').value = role;
+            document.querySelectorAll('.role-option').forEach(opt => {
+                opt.classList.remove('active');
+                if(opt.textContent.toLowerCase().includes(role)) {
+                    opt.classList.add('active');
+                }
             });
-        });
-
-        // Set default selected card based on old value or default
-        const selectedRole = roleInput.value;
-        const defaultCard = document.querySelector(`.role-card[data-role="${selectedRole}"]`);
-        if (defaultCard) {
-            defaultCard.classList.add('selected');
         }
-
-        // Form submission handling
-        document.getElementById('registerForm').addEventListener('submit', function (e) {
-            const btn = document.getElementById('registerBtn');
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('password_confirmation').value;
-
-            // Client-side password validation
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Passwords do not match!');
-                btn.disabled = false;
-                return false;
-            }
-
-            // Disable button to prevent double submission
-            btn.disabled = true;
-            btn.textContent = 'Creating account...';
-        });
-
-        // Real-time password strength indicator (optional)
-        const passwordInput = document.getElementById('password');
-        passwordInput.addEventListener('input', function () {
-            const password = this.value;
-            let strength = 0;
-
-            if (password.length >= 8) strength++;
-            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
-            if (password.match(/\d/)) strength++;
-            if (password.match(/[^a-zA-Z\d]/)) strength++;
-
-            // You can add a strength meter div and update it here
-            // This is optional but improves UX
-        });
     </script>
 </body>
-
 </html>
