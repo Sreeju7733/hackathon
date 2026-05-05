@@ -10,7 +10,15 @@ use Illuminate\Validation\Rules\Password;
 class ProfileController extends Controller
 {
     /**
-     * Show the profile edit form
+     * Show the Help Center page
+     */
+    public function help()
+    {
+        return view('pages.help');
+    }
+
+    /**
+     * Show the user's profile edit form.
      */
     public function edit()
     {

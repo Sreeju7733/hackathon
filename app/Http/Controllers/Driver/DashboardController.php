@@ -13,6 +13,12 @@ class DashboardController extends Controller
     public function index()
     {
         $user = Auth::user();
+        $now = Carbon::now();
+
+        // Auto-complete expired bookings
+        Booking::where('status', 'confirmed')
+            ->where('end_time', '<', $now)
+            ->update(['status' => 'completed']);
 
         // Ensure user has at least one vehicle for demo purposes
         if ($user->role === 'driver' && $user->vehicles()->count() === 0) {
@@ -30,15 +36,30 @@ class DashboardController extends Controller
 
         $vehicle = $user->vehicles()->where('is_primary', true)->first();
 
-        // 1. Total Energy Used
-        $completedBookings = Booking::where('driver_id', $user->id)
-            ->where('status', 'completed')
+        // 1. Total Energy Used (Completed + Ongoing)
+        $allBookings = Booking::where('driver_id', $user->id)
+            ->whereIn('status', ['confirmed', 'completed'])
             ->with('charger')
             ->get();
 
-        $totalEnergy = $completedBookings->sum(function($booking) {
-            $durationHours = Carbon::parse($booking->start_time)->diffInHours($booking->end_time);
-            return $booking->charger->power_kw * $durationHours;
+        $totalEnergy = $allBookings->sum(function($booking) use ($now) {
+            $start = Carbon::parse($booking->start_time);
+            $end = Carbon::parse($booking->end_time);
+            
+            // If it's a completed session, use the full duration
+            if ($booking->status === 'completed') {
+                $durationMinutes = $start->diffInMinutes($end);
+            } else {
+                // If it's an ongoing session, calculate energy used up to NOW
+                if ($start->isPast()) {
+                    $effectiveEnd = $now->isBefore($end) ? $now : $end;
+                    $durationMinutes = $start->diffInMinutes($effectiveEnd);
+                } else {
+                    $durationMinutes = 0; // Hasn't started yet
+                }
+            }
+            
+            return ($booking->charger->power_kw / 60) * $durationMinutes;
         });
 
         // 2. Spending This Month

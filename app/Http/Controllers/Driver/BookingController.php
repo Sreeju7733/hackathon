@@ -42,6 +42,21 @@ class BookingController extends Controller
         $startTime = Carbon::parse($request->start_time);
         $endTime = $startTime->copy()->addHours((float)$request->duration);
 
+        // Check if driver already has an overlapping booking
+        $hasOverlap = Booking::where('driver_id', auth()->id())
+            ->whereIn('status', ['confirmed', 'pending'])
+            ->where(function ($query) use ($startTime, $endTime) {
+                $query->where(function ($q) use ($startTime, $endTime) {
+                    $q->where('start_time', '<', $endTime)
+                      ->where('end_time', '>', $startTime);
+                });
+            })
+            ->exists();
+
+        if ($hasOverlap) {
+            return back()->withInput()->with('error', 'You already have another charging session scheduled during this time window.');
+        }
+
         // Calculate final price
         $pricing = $this->pricingService->calculatePrice($charger, $startTime, $endTime);
 

@@ -4,70 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') | VoltCharge</title>
+    <title>@yield('title') - VoltCharge</title>
     
-    <!-- Google Fonts: Outfit & Inter -->
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome -->
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
         :root {
             --primary: #4f46e5;
+            --primary-dark: #4338ca;
             --primary-light: #818cf8;
-            --primary-dark: #3730a3;
-            --secondary: #64748b;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --background: #f8fafc;
+            --bg-body: #f8fafc;
             --sidebar-width: 280px;
-            --sidebar-collapsed-width: 80px;
-            --navbar-height: 70px;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --glass: rgba(255, 255, 255, 0.9);
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
-            --radius-xl: 1.25rem;
-            --radius-lg: 0.75rem;
+            --sidebar-bg: #ffffff;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --radius-lg: 16px;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--background);
-            color: var(--text-main);
-            min-height: 100vh;
+            background-color: var(--bg-body);
+            color: #1e293b;
             overflow-x: hidden;
         }
 
-        h1, h2, h3, h4, h5, h6, .navbar-brand {
+        h1, h2, h3, h4, h5, .fw-bold {
             font-family: 'Outfit', sans-serif;
         }
 
-        /* Layout Structure */
-        .wrapper {
-            display: flex;
-            width: 100%;
-            align-items: stretch;
-        }
-
-        /* Sidebar */
+        /* Sidebar Styling */
         #sidebar {
-            min-width: var(--sidebar-width);
-            max-width: var(--sidebar-width);
-            background: #ffffff;
-            color: var(--text-main);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: var(--sidebar-width);
             height: 100vh;
             position: fixed;
-            z-index: 1000;
+            top: 0;
+            left: 0;
+            background: var(--sidebar-bg);
             border-right: 1px solid #e2e8f0;
+            z-index: 1000;
+            transition: all 0.3s;
             display: flex;
             flex-direction: column;
         }
@@ -83,7 +64,7 @@
             gap: 0.75rem;
         }
 
-        .logo-icon {
+        .logo-box {
             width: 40px;
             height: 40px;
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
@@ -96,28 +77,26 @@
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
-        .logo-text {
+        .brand-name {
             font-size: 1.5rem;
             font-weight: 800;
-            background: linear-gradient(to right, var(--text-main), var(--primary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #0f172a;
             letter-spacing: -0.5px;
         }
 
         .sidebar-menu {
-            flex: 1;
-            padding: 0 1rem;
+            padding: 0.5rem 1rem;
+            flex-grow: 1;
             overflow-y: auto;
         }
 
         .menu-label {
             font-size: 0.75rem;
-            font-weight: 700;
             text-transform: uppercase;
-            color: var(--text-muted);
-            margin: 1.5rem 0 0.75rem 1rem;
-            letter-spacing: 0.05em;
+            letter-spacing: 1px;
+            color: #94a3b8;
+            font-weight: 700;
+            margin: 1.5rem 0 0.75rem 0.75rem;
         }
 
         .nav-link {
@@ -125,16 +104,15 @@
             align-items: center;
             gap: 1rem;
             padding: 0.875rem 1rem;
-            color: var(--text-muted);
+            color: #64748b;
             font-weight: 500;
-            border-radius: var(--radius-lg);
+            border-radius: 12px;
             transition: all 0.2s;
             margin-bottom: 0.25rem;
-            text-decoration: none;
         }
 
         .nav-link i {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             width: 24px;
             text-align: center;
         }
@@ -145,8 +123,8 @@
         }
 
         .nav-link.active {
-            color: white !important;
-            background: var(--primary) !important;
+            color: white;
+            background: var(--primary);
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
         }
 
@@ -178,9 +156,9 @@
 
         /* Navbar */
         .top-navbar {
-            height: var(--navbar-height);
-            background: var(--glass);
-            backdrop-filter: blur(12px);
+            height: 70px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid #e2e8f0;
             padding: 0 2rem;
             display: flex;
@@ -188,39 +166,31 @@
             justify-content: space-between;
             position: sticky;
             top: 0;
-            z-index: 900;
+            z-index: 999;
         }
 
         #sidebarCollapse {
-            width: 40px;
-            height: 40px;
-            background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            background: none;
+            border: none;
+            color: #64748b;
+            font-size: 1.25rem;
             cursor: pointer;
-        }
-
-        #sidebarCollapse:hover {
-            background: #f8fafc;
-            color: var(--primary);
+            padding: 0.5rem;
         }
 
         .page-content {
             padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
         }
 
-        /* Cards & Components */
+        /* Stats Cards */
         .stat-card {
             background: white;
-            border-radius: var(--radius-xl);
+            border-radius: var(--radius-lg);
             padding: 1.5rem;
-            border: 1px solid #f1f5f9;
             box-shadow: var(--card-shadow);
+            border: 1px solid rgba(226, 232, 240, 0.5);
             transition: transform 0.2s;
         }
 
@@ -239,7 +209,7 @@
             margin-bottom: 1rem;
         }
 
-        /* Mobile Adjustments */
+        /* Mobile Responsive */
         @media (max-width: 992px) {
             #sidebar {
                 margin-left: calc(-1 * var(--sidebar-width));
@@ -250,17 +220,8 @@
             #content {
                 padding-left: 0;
             }
-            .sidebar-overlay {
-                display: none;
-                position: fixed;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.3);
-                z-index: 999;
-                backdrop-filter: blur(2px);
-            }
-            .sidebar-overlay.active {
-                display: block;
+            #content.active {
+                padding-left: var(--sidebar-width);
             }
         }
 
@@ -269,7 +230,7 @@
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: transparent;
         }
         ::-webkit-scrollbar-thumb {
             background: #cbd5e1;
@@ -282,28 +243,27 @@
     @stack('styles')
 </head>
 <body>
-    <div class="wrapper">
-        <div class="sidebar-overlay" id="overlay"></div>
 
+    <div class="wrapper d-flex">
         <!-- Sidebar -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <div class="logo-icon">
+                <div class="logo-box">
                     <i class="fas fa-bolt"></i>
                 </div>
-                <span class="logo-text">VoltCharge</span>
+                <span class="brand-name">VoltCharge</span>
             </div>
 
             <div class="sidebar-menu">
-                <div class="menu-label">Main Menu</div>
-                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <div class="menu-label">Main</div>
+                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->is('dashboard') || request()->is('*/dashboard') ? 'active' : '' }}">
                     <i class="fas fa-chart-pie"></i>
                     <span>Overview</span>
                 </a>
 
                 @if(auth()->user()->isAdmin())
                     <div class="menu-label">Administration</div>
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                         <i class="fas fa-users-gear"></i>
                         <span>User Management</span>
                     </a>
@@ -311,11 +271,15 @@
 
                 @if(auth()->user()->isHost())
                     <div class="menu-label">Host Panel</div>
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('host.chargers.index') }}" class="nav-link {{ request()->routeIs('host.chargers.index') ? 'active' : '' }}">
                         <i class="fas fa-plug-circle-bolt"></i>
                         <span>My Chargers</span>
                     </a>
-                    <a href="#" class="nav-link">
+                    <a href="{{ route('host.chargers.map') }}" class="nav-link {{ request()->routeIs('host.chargers.map') ? 'active' : '' }}">
+                        <i class="fas fa-map-location-dot"></i>
+                        <span>Network Map</span>
+                    </a>
+                    <a href="{{ route('host.reservations.index') }}" class="nav-link {{ request()->routeIs('host.reservations.*') ? 'active' : '' }}">
                         <i class="fas fa-calendar-days"></i>
                         <span>Reservations</span>
                     </a>
@@ -340,7 +304,7 @@
                 </a>
 
                 <div class="menu-label">Support</div>
-                <a href="#" class="nav-link">
+                <a href="{{ route('help') }}" class="nav-link {{ request()->routeIs('help') ? 'active' : '' }}">
                     <i class="fas fa-circle-question"></i>
                     <span>Help Center</span>
                 </a>
@@ -373,14 +337,10 @@
                 </button>
 
                 <div class="d-flex align-items-center gap-3">
-                    <div class="position-relative">
-                        <button class="btn btn-light rounded-circle p-2">
-                            <i class="fas fa-bell"></i>
-                        </button>
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                            3
-                        </span>
-                    </div>
+                    <a href="{{ route('help') }}" class="btn btn-light rounded-pill px-3 py-2 border d-flex align-items-center gap-2 small fw-bold text-muted">
+                        <i class="fas fa-circle-question text-primary"></i>
+                        Help
+                    </a>
                     <div class="vr mx-2 text-muted opacity-25" style="height: 24px;"></div>
                     <div class="current-date d-none d-md-block text-muted small fw-medium">
                         {{ now()->format('D, M d, Y') }}

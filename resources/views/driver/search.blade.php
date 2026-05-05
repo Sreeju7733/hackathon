@@ -114,6 +114,21 @@
             align-items: center;
             justify-content: center;
         }
+        /* Ensure Modal is on top of Leaflet */
+        .modal {
+            z-index: 9999 !important;
+        }
+        .modal-backdrop {
+            z-index: 9998 !important;
+        }
+        .charger-card {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .charger-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
     </style>
 @endpush
 
@@ -185,6 +200,20 @@
                     </div>
 
                     <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Start Time</label>
+                        <input type="datetime-local" id="filterStartTime" class="form-control" value="{{ now()->format('Y-m-d\TH:i') }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted text-uppercase">Duration (Hours)</label>
+                        <select id="filterDuration" class="form-select">
+                            <option value="0.5">30 Mins</option>
+                            <option value="1" selected>1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                            <option value="4">4 Hours</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
                         <label class="form-label fw-bold small text-muted text-uppercase">Price Range (₹/hr)</label>
                         <input type="number" class="form-control" id="price_max" placeholder="Max price per hour">
                     </div>
@@ -200,14 +229,10 @@
         <div class="col-lg-8 col-xl-9">
             <div id="map"></div>
 
-            <div class="d-flex justify-content-between align-items-end mb-4">
+            <div class="mb-4">
                 <div>
                     <h3 class="fw-bold mb-1">Nearby Chargers</h3>
                     <p class="text-muted mb-0"><span id="resultCount" class="fw-bold text-primary">0</span> chargers found in your area</p>
-                </div>
-                <div class="btn-group shadow-sm" role="group">
-                    <button type="button" class="btn btn-white active border">List</button>
-                    <button type="button" class="btn btn-white border">Grid</button>
                 </div>
             </div>
 
@@ -303,7 +328,9 @@
                 longitude: parseFloat(lng),
                 radius: parseFloat(radius),
                 charger_type: types,
-                price_max: document.getElementById('price_max').value ? parseFloat(document.getElementById('price_max').value) : null
+                price_max: document.getElementById('price_max').value ? parseFloat(document.getElementById('price_max').value) : null,
+                start_time: document.getElementById('filterStartTime').value,
+                duration_hours: parseFloat(document.getElementById('filterDuration').value)
             };
 
             isSearching = true;
@@ -400,13 +427,28 @@
         }
 
         async function showDetails(id) {
+            const body = document.getElementById('chargerModalBody');
+            const originalHtml = body.innerHTML;
+            
             try {
-                const response = await fetch(`{{ route('driver.estimate.price', ['chargerId' => '__ID__'], false) }}`.replace('__ID__', id));
+                // Show a small loader in the results area or just handle the wait
+                const startTime = document.getElementById('filterStartTime').value;
+                const duration = document.getElementById('filterDuration').value;
+                
+                const response = await fetch(`{{ route('driver.estimate.price', ['chargerId' => '__ID__'], false) }}`.replace('__ID__', id) + `?start_time=${startTime}&duration_hours=${duration}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to fetch charger details');
+                
                 const data = await response.json();
                 if (data.success) {
                     const c = data.charger;
                     const p = data.pricing;
-                    const body = document.getElementById('chargerModalBody');
+                    
                     body.innerHTML = `
                         <div class="text-center mb-4">
                             <div class="fs-1 mb-2">${getIcon(c.charger_type)}</div>
@@ -429,11 +471,11 @@
                             </div>
                         </div>
 
-                        <div class="stat-card bg-primary bg-opacity-5 border-0 mb-4">
+                        <div class="stat-card bg-primary text-white border-0 mb-4 shadow-sm" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <div class="small fw-bold text-primary text-uppercase">Current Price</div>
-                                    <div class="fs-2 fw-extrabold text-primary">₹${p.price_per_hour}<span class="fs-6 fw-normal text-muted">/hr</span></div>
+                                    <div class="small fw-bold text-white-50 text-uppercase">Current Price</div>
+                                    <div class="fs-2 fw-extrabold text-white">₹${p.price_per_hour}<span class="fs-6 fw-normal text-white-50">/hr</span></div>
                                 </div>
                                 <div class="text-end">
                                     <div class="badge bg-success">Available</div>
@@ -441,13 +483,21 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold fs-5" onclick="location.href='/driver/book/${c.id}'">
+                        <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold fs-5 shadow-sm" onclick="location.href='/driver/book/${c.id}?start_time=${encodeURIComponent(startTime)}&duration=${duration}'">
                             Confirm Booking
                         </button>
                     `;
-                    new bootstrap.Modal(document.getElementById('chargerModal')).show();
+                    
+                    const modalElement = document.getElementById('chargerModal');
+                    const modalInstance = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                    modalInstance.show();
+                } else {
+                    alert('Error: ' + (data.message || 'Could not load charger details'));
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.error(e);
+                alert('Connection error: ' + e.message);
+            }
         }
 
         function getIcon(type) {

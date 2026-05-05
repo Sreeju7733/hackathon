@@ -72,7 +72,7 @@
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text bg-white border-end-0"><i class="fas fa-calendar-alt text-primary"></i></span>
                                     <input type="datetime-local" name="start_time" class="form-control border-start-0" required 
-                                           min="{{ now()->format('Y-m-d\TH:i') }}" value="{{ now()->addMinutes(15)->format('Y-m-d\TH:i') }}">
+                                           min="{{ now()->format('Y-m-d\TH:i') }}" value="{{ request('start_time', now()->addMinutes(15)->format('Y-m-d\TH:i')) }}">
                                 </div>
                             </div>
                             <div class="col-md-5">
@@ -80,11 +80,11 @@
                                 <div class="input-group input-group-lg">
                                     <span class="input-group-text bg-white border-end-0"><i class="fas fa-clock text-primary"></i></span>
                                     <select name="duration" class="form-select border-start-0" required>
-                                        <option value="0.5">30 Mins</option>
-                                        <option value="1" selected>1 Hour</option>
-                                        <option value="2">2 Hours</option>
-                                        <option value="3">3 Hours</option>
-                                        <option value="4">4 Hours</option>
+                                        <option value="0.5" {{ request('duration') == '0.5' ? 'selected' : '' }}>30 Mins</option>
+                                        <option value="1" {{ request('duration') == '1' || !request('duration') ? 'selected' : '' }}>1 Hour</option>
+                                        <option value="2" {{ request('duration') == '2' ? 'selected' : '' }}>2 Hours</option>
+                                        <option value="3" {{ request('duration') == '3' ? 'selected' : '' }}>3 Hours</option>
+                                        <option value="4" {{ request('duration') == '4' ? 'selected' : '' }}>4 Hours</option>
                                     </select>
                                 </div>
                             </div>

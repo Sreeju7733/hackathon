@@ -35,8 +35,5 @@ class DatabaseSeeder extends Seeder
 
         // Call the ChargerSeeder
         $this->call(ChargerSeeder::class);
-        
-        // Create some additional bookings using factory
-        \App\Models\Booking::factory(10)->create();
     }
 }

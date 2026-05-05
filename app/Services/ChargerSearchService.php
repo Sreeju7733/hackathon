@@ -39,6 +39,18 @@ class ChargerSearchService
             ->whereBetween('latitude', [$boundingBox['min_lat'], $boundingBox['max_lat']])
             ->whereBetween('longitude', [$boundingBox['min_lng'], $boundingBox['max_lng']]);
 
+        // Availability Filter (Conflict Check)
+        if (!empty($filters['start_time']) && !empty($filters['duration_hours'])) {
+            $requestedStart = Carbon::parse($filters['start_time']);
+            $requestedEnd = $requestedStart->copy()->addHours($filters['duration_hours']);
+
+            $query->whereDoesntHave('bookings', function ($q) use ($requestedStart, $requestedEnd) {
+                $q->where('status', 'confirmed')
+                  ->where('start_time', '<', $requestedEnd)
+                  ->where('end_time', '>', $requestedStart);
+            });
+        }
+
         // Apply filters
         if (!empty($filters['charger_type'])) {
             $query->whereIn('charger_type', (array) $filters['charger_type']);

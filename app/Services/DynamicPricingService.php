@@ -25,8 +25,8 @@ class DynamicPricingService
         $startTime = $startTime ?? Carbon::now();
         $endTime = $endTime ?? Carbon::now()->addHour();
 
-        // Calculate duration in hours
-        $durationHours = $endTime->diffInHours($startTime);
+        // Calculate duration in hours (with minute precision)
+        $durationHours = $endTime->diffInMinutes($startTime) / 60;
         if ($durationHours < 0.25)
             $durationHours = 0.25; // Minimum 15 minutes
 

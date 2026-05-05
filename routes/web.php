@@ -27,17 +27,26 @@ Route::middleware([SecurityHeaders::class])->group(function () {
         Route::post('/profile/vehicle', [ProfileController::class, 'updateVehicle'])->name('profile.vehicle.update');
         Route::post('/profile/vehicle/soc', [ProfileController::class, 'updateSoc'])->name('profile.vehicle.soc');
 
+        // Help Center
+        Route::get('/help', [ProfileController::class, 'help'])->name('help');
+
         // Role-based dashboard routes
         Route::middleware('role:admin')->prefix('admin')->name('admin.')->group(function () {
-            Route::get('/dashboard', function () {
-                return view('dashboard.admin');
-            })->name('dashboard');
+            Route::get('/dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->name('dashboard');
+            Route::get('/users', [\App\Http\Controllers\Admin\DashboardController::class, 'users'])->name('users.index');
         });
 
         Route::middleware('role:host')->prefix('host')->name('host.')->group(function () {
-            Route::get('/dashboard', function () {
-                return view('dashboard.host');
-            })->name('dashboard');
+            Route::get('/dashboard', [\App\Http\Controllers\Host\DashboardController::class, 'index'])->name('dashboard');
+            Route::get('/chargers', [\App\Http\Controllers\Host\ChargerController::class, 'index'])->name('chargers.index');
+            Route::get('/chargers/map', [\App\Http\Controllers\Host\ChargerController::class, 'map'])->name('chargers.map');
+            Route::get('/chargers/create', [\App\Http\Controllers\Host\ChargerController::class, 'create'])->name('chargers.create');
+            Route::post('/chargers', [\App\Http\Controllers\Host\ChargerController::class, 'store'])->name('chargers.store');
+            Route::get('/chargers/{id}/edit', [\App\Http\Controllers\Host\ChargerController::class, 'edit'])->name('chargers.edit');
+            Route::post('/chargers/{id}', [\App\Http\Controllers\Host\ChargerController::class, 'update'])->name('chargers.update');
+            Route::delete('/chargers/{id}', [\App\Http\Controllers\Host\ChargerController::class, 'destroy'])->name('chargers.destroy');
+            Route::get('/reservations', [\App\Http\Controllers\Host\DashboardController::class, 'reservations'])->name('reservations.index');
+            Route::post('/reservations/{id}/status', [\App\Http\Controllers\Host\DashboardController::class, 'updateReservationStatus'])->name('reservations.status');
         });
 
         Route::middleware(['auth', 'role:driver'])->prefix('driver')->name('driver.')->group(function () {

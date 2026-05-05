@@ -40,6 +40,8 @@ class ChargerSearchController extends Controller
             'min_power' => 'nullable|numeric|min:0|max:350',
             'max_power' => 'nullable|numeric|min:0|max:350',
             'price_max' => 'nullable|numeric|min:0',
+            'start_time' => 'nullable|date',
+            'duration_hours' => 'nullable|numeric|min:0.5|max:24',
         ]);
 
         try {
@@ -47,7 +49,7 @@ class ChargerSearchController extends Controller
                 $request->latitude,
                 $request->longitude,
                 $request->radius ?? 10,
-                $request->only(['charger_type', 'min_power', 'max_power', 'price_max'])
+                $request->only(['charger_type', 'min_power', 'max_power', 'price_max', 'start_time', 'duration_hours'])
             );
 
             return response()->json([
@@ -68,28 +70,36 @@ class ChargerSearchController extends Controller
      */
     public function estimatePrice(Request $request, $chargerId)
     {
-        $request->validate([
-            'start_time' => 'nullable|date|after:now',
-            'duration_hours' => 'nullable|numeric|min:0.25|max:24'
-        ]);
+        try {
+            $request->validate([
+                'start_time' => 'nullable|date',
+                'duration_hours' => 'nullable|numeric|min:0.25|max:24'
+            ]);
 
-        $charger = \App\Models\Charger::findOrFail($chargerId);
+            $charger = \App\Models\Charger::findOrFail($chargerId);
 
-        $startTime = $request->start_time ? \Carbon\Carbon::parse($request->start_time) : null;
-        $duration = $request->duration_hours ?? 1;
-        $endTime = $startTime ? $startTime->copy()->addHours($duration) : null;
+            $startTime = $request->start_time ? \Carbon\Carbon::parse($request->start_time) : \Carbon\Carbon::now();
+            $duration = (float) ($request->duration_hours ?? 1);
+            $endTime = $startTime->copy()->addHours($duration);
 
-        $pricing = $this->pricingService->calculatePrice($charger, $startTime, $endTime);
+            $pricing = $this->pricingService->calculatePrice($charger, $startTime, $endTime);
 
-        return response()->json([
-            'success' => true,
-            'pricing' => $pricing,
-            'charger' => [
-                'id' => $charger->id,
-                'label' => $charger->label,
-                'power_kw' => $charger->power_kw,
-                'charger_type' => $charger->charger_type
-            ]
-        ]);
+            return response()->json([
+                'success' => true,
+                'pricing' => $pricing,
+                'charger' => [
+                    'id' => $charger->id,
+                    'label' => $charger->label,
+                    'power_kw' => $charger->power_kw,
+                    'charger_type' => $charger->charger_type,
+                    'address' => $charger->address
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Estimation failed: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }
