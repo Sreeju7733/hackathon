@@ -4,34 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Dashboard') | Hackathon Portal</title>
+    <title>@yield('title', 'Dashboard') | VoltCharge</title>
     
-    <!-- Google Fonts: Inter -->
+    <!-- Google Fonts: Outfit & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome for icons -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         :root {
-            --primary: #667eea;
-            --primary-dark: #764ba2;
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
             --secondary: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
             --background: #f8fafc;
-            --sidebar-width: 260px;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
             --navbar-height: 70px;
-            --text-main: #1e293b;
+            --text-main: #0f172a;
             --text-muted: #64748b;
-            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --glass: rgba(255, 255, 255, 0.8);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --glass: rgba(255, 255, 255, 0.9);
+            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            --radius-xl: 1.25rem;
+            --radius-lg: 0.75rem;
         }
 
         body {
@@ -39,289 +43,377 @@
             background-color: var(--background);
             color: var(--text-main);
             min-height: 100vh;
-            display: flex;
+            overflow-x: hidden;
         }
 
-        /* Sidebar Styling */
-        .sidebar {
-            width: var(--sidebar-width);
-            background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
+        h1, h2, h3, h4, h5, h6, .navbar-brand {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        /* Layout Structure */
+        .wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        /* Sidebar */
+        #sidebar {
+            min-width: var(--sidebar-width);
+            max-width: var(--sidebar-width);
+            background: #ffffff;
+            color: var(--text-main);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             height: 100vh;
             position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 100;
-            transition: all 0.3s ease;
-            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #sidebar.active {
+            margin-left: calc(-1 * var(--sidebar-width));
         }
 
         .sidebar-header {
-            height: var(--navbar-height);
+            padding: 2rem 1.5rem;
             display: flex;
             align-items: center;
-            padding: 0 24px;
-            font-size: 1.25rem;
-            font-weight: 700;
-            letter-spacing: -0.5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            gap: 0.75rem;
         }
 
-        .sidebar-menu {
-            padding: 24px 0;
-            list-style: none;
-        }
-
-        .menu-item {
-            padding: 12px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: rgba(255, 255, 255, 0.8);
-            text-decoration: none;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: all 0.2s;
-        }
-
-        .menu-item:hover, .menu-item.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .menu-item i {
-            width: 20px;
-            text-align: center;
-            font-size: 1.1rem;
-        }
-
-        /* Main Content Area */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Navbar Styling */
-        .navbar {
-            height: var(--navbar-height);
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 32px;
-            position: sticky;
-            top: 0;
-            z-index: 90;
-        }
-
-        .breadcrumb {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            cursor: pointer;
-            padding: 6px 12px;
-            border-radius: 8px;
-            transition: background 0.2s;
-        }
-
-        .user-profile:hover {
-            background: #f1f5f9;
-        }
-
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            background: var(--primary);
-            color: white;
-            border-radius: 50%;
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600;
+            color: white;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
-        .user-name {
-            font-weight: 600;
-            font-size: 0.9rem;
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--text-main), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
         }
 
-        /* Page Content */
-        .page-body {
-            padding: 32px;
+        .sidebar-menu {
             flex: 1;
+            padding: 0 1rem;
+            overflow-y: auto;
         }
 
-        .alert {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 0.95rem;
-            animation: slideIn 0.3s ease-out;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-10px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .alert-success {
-            background: #f0fdf4;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-
-        /* Card Component */
-        .card {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
-            padding: 24px;
-            border: 1px solid #f1f5f9;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        }
-
-        .card-title {
-            font-size: 1.1rem;
+        .menu-label {
+            font-size: 0.75rem;
             font-weight: 700;
-            margin-bottom: 16px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin: 1.5rem 0 0.75rem 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-link {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 1rem;
+            padding: 0.875rem 1rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-radius: var(--radius-lg);
+            transition: all 0.2s;
+            margin-bottom: 0.25rem;
+            text-decoration: none;
         }
 
-        /* Grid */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+        .nav-link i {
+            font-size: 1.1rem;
+            width: 24px;
+            text-align: center;
         }
 
-        /* Form / Button Reset */
-        button {
+        .nav-link:hover {
+            color: var(--primary);
+            background: #f1f5f9;
+        }
+
+        .nav-link.active {
+            color: white !important;
+            background: var(--primary) !important;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: var(--radius-lg);
+        }
+
+        /* Main Content */
+        #content {
+            width: 100%;
+            padding-left: var(--sidebar-width);
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        #content.active {
+            padding-left: 0;
+        }
+
+        /* Navbar */
+        .top-navbar {
+            height: var(--navbar-height);
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid #e2e8f0;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 900;
+        }
+
+        #sidebarCollapse {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
             cursor: pointer;
-            border: none;
-            background: none;
-            font-family: inherit;
         }
 
-        .logout-form {
-            display: inline;
+        #sidebarCollapse:hover {
+            background: #f8fafc;
+            color: var(--primary);
         }
 
-        /* Role specific colors */
-        .role-admin { border-top: 4px solid #ef4444; }
-        .role-host { border-top: 4px solid #f59e0b; }
-        .role-driver { border-top: 4px solid #10b981; }
+        .page-content {
+            padding: 2rem;
+        }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
+        /* Cards & Components */
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 992px) {
+            #sidebar {
+                margin-left: calc(-1 * var(--sidebar-width));
             }
-            .main-content {
+            #sidebar.active {
                 margin-left: 0;
             }
+            #content {
+                padding-left: 0;
+            }
+            .sidebar-overlay {
+                display: none;
+                position: fixed;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.3);
+                z-index: 999;
+                backdrop-filter: blur(2px);
+            }
+            .sidebar-overlay.active {
+                display: block;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
         }
     </style>
     @stack('styles')
 </head>
 <body>
-    <!-- Sidebar -->
-    <aside class="sidebar">
-        <div class="sidebar-header">
-            <i class="fas fa-rocket mr-2"></i> Hackathon
-        </div>
-        <nav class="sidebar-menu">
-            <a href="{{ route('dashboard') }}" class="menu-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="fas fa-th-large"></i> Dashboard
-            </a>
-            
-            @if(auth()->user()->isAdmin())
-                <a href="#" class="menu-item">
-                    <i class="fas fa-users"></i> Users
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-cog"></i> Settings
-                </a>
-            @endif
+    <div class="wrapper">
+        <div class="sidebar-overlay" id="overlay"></div>
 
-            @if(auth()->user()->isHost())
-                <a href="#" class="menu-item">
-                    <i class="fas fa-building"></i> Properties
-                </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-calendar-check"></i> Bookings
-                </a>
-            @endif
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <span class="logo-text">VoltCharge</span>
+            </div>
 
-            @if(auth()->user()->isDriver())
-                <a href="#" class="menu-item">
-                    <i class="fas fa-car"></i> My Trips
+            <div class="sidebar-menu">
+                <div class="menu-label">Main Menu</div>
+                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview</span>
                 </a>
-                <a href="#" class="menu-item">
-                    <i class="fas fa-wallet"></i> Earnings
-                </a>
-            @endif
 
-            <div style="margin-top: auto; padding: 24px;">
-                <form action="{{ route('logout') }}" method="POST" class="logout-form">
-                    @csrf
-                    <button type="submit" class="menu-item" style="width: 100%; border-radius: 8px; background: rgba(255,255,255,0.1);">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
-                </form>
+                @if(auth()->user()->isAdmin())
+                    <div class="menu-label">Administration</div>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-users-gear"></i>
+                        <span>User Management</span>
+                    </a>
+                @endif
+
+                @if(auth()->user()->isHost())
+                    <div class="menu-label">Host Panel</div>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-plug-circle-bolt"></i>
+                        <span>My Chargers</span>
+                    </a>
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-calendar-days"></i>
+                        <span>Reservations</span>
+                    </a>
+                @endif
+
+                @if(auth()->user()->isDriver())
+                    <div class="menu-label">Driver Panel</div>
+                    <a href="{{ route('driver.search') }}" class="nav-link {{ request()->routeIs('driver.search') ? 'active' : '' }}">
+                        <i class="fas fa-location-dot"></i>
+                        <span>Find Chargers</span>
+                    </a>
+                    <a href="{{ route('driver.dashboard') }}" class="nav-link {{ request()->routeIs('driver.dashboard') ? 'active' : '' }}">
+                        <i class="fas fa-clock-rotate-left"></i>
+                        <span>My History</span>
+                    </a>
+                @endif
+
+                <div class="menu-label">Settings</div>
+                <a href="{{ route('profile.edit') }}" class="nav-link {{ request()->routeIs('profile.edit') ? 'active' : '' }}">
+                    <i class="fas fa-user-gear"></i>
+                    <span>Profile Settings</span>
+                </a>
+
+                <div class="menu-label">Support</div>
+                <a href="#" class="nav-link">
+                    <i class="fas fa-circle-question"></i>
+                    <span>Help Center</span>
+                </a>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="user-card">
+                    <div class="user-avatar" style="width: 40px; height: 40px; background: #e0e7ff; color: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                    </div>
+                    <div class="user-info flex-grow-1 overflow-hidden">
+                        <div class="user-name text-truncate" style="font-weight: 600; font-size: 0.875rem;">{{ auth()->user()->name }}</div>
+                        <div class="user-role text-muted" style="font-size: 0.75rem;">{{ ucfirst(auth()->user()->role) }}</div>
+                    </div>
+                    <form action="{{ route('logout') }}" method="POST" id="logout-form">
+                        @csrf
+                        <button type="submit" class="btn-logout text-danger" style="border: none; background: none; font-size: 1rem; cursor: pointer;">
+                            <i class="fas fa-right-from-bracket"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </nav>
-    </aside>
 
-    <!-- Main Content -->
-    <main class="main-content">
-        <header class="navbar">
-            <div class="breadcrumb">
-                Pages / @yield('title')
-            </div>
-            <div class="user-profile">
-                <div class="user-avatar">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                </div>
-                <div class="user-name">
-                    {{ auth()->user()->name }}
-                    <div style="font-size: 0.75rem; font-weight: 400; color: var(--text-muted);">
-                        {{ ucfirst(auth()->user()->role) }}
+        <!-- Page Content -->
+        <div id="content">
+            <header class="top-navbar">
+                <button type="button" id="sidebarCollapse">
+                    <i class="fas fa-bars-staggered"></i>
+                </button>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="position-relative">
+                        <button class="btn btn-light rounded-circle p-2">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                            3
+                        </span>
+                    </div>
+                    <div class="vr mx-2 text-muted opacity-25" style="height: 24px;"></div>
+                    <div class="current-date d-none d-md-block text-muted small fw-medium">
+                        {{ now()->format('D, M d, Y') }}
                     </div>
                 </div>
+            </header>
+
+            <div class="page-content">
+                @if(session('success'))
+                    <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-3 mb-4" role="alert" style="border-radius: 12px; background: #ecfdf5;">
+                        <i class="fas fa-circle-check fs-4"></i>
+                        <div>{{ session('success') }}</div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                @yield('content')
             </div>
-        </header>
-
-        <div class="page-body">
-            @if(session('success'))
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @yield('content')
         </div>
-    </main>
+    </div>
 
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#sidebarCollapse, #overlay').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+                $('#overlay').toggleClass('active');
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>

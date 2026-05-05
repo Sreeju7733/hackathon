@@ -20,48 +20,42 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'role' => 'string', // Cast role as string
+            'role' => 'string',
         ];
     }
 
-    /**
-     * Check if user can login (override if needed)
-     */
     public function canLogin(): bool
     {
-        // Allow login even without email verification
         return true;
     }
 
-    /**
-     * Check if user has a specific role
-     */
     public function hasRole(string $role): bool
     {
         return $this->role === $role;
     }
 
-    /**
-     * Check if user is a driver
-     */
     public function isDriver(): bool
     {
         return $this->role === 'driver';
     }
 
-    /**
-     * Check if user is a host
-     */
     public function isHost(): bool
     {
         return $this->role === 'host';
     }
 
-    /**
-     * Check if user is an admin
-     */
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class);
+    }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'driver_id');
     }
 }

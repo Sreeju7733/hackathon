@@ -3,20 +3,15 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         // Admin Account
         User::factory()->create([
             'name' => 'System Admin',
@@ -37,5 +32,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'host@example.com',
             'role' => 'host',
         ]);
+
+        // Call the ChargerSeeder
+        $this->call(ChargerSeeder::class);
+        
+        // Create some additional bookings using factory
+        \App\Models\Booking::factory(10)->create();
     }
 }
