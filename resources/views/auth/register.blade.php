@@ -60,16 +60,24 @@
             font-size: 14px;
         }
 
-        input {
+        input,
+        select {
             width: 100%;
             padding: 12px;
             border: 1px solid #ddd;
             border-radius: 6px;
             font-size: 14px;
             transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
         }
 
-        input:focus {
+        select {
+            cursor: pointer;
+            background-color: white;
+        }
+
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #667eea;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
@@ -97,6 +105,12 @@
             transform: translateY(0);
         }
 
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .alert {
             padding: 12px;
             border-radius: 6px;
@@ -110,8 +124,20 @@
             border: 1px solid #f5c6cb;
         }
 
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
         .error-message {
             color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .help-text {
+            color: #6c757d;
             font-size: 12px;
             margin-top: 5px;
         }
@@ -129,6 +155,40 @@
             font-weight: 500;
         }
 
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .role-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .role-card:hover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+
+        .role-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        }
+
+        .role-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .role-description {
+            font-size: 12px;
+            color: #666;
+        }
+
         @media (max-width: 480px) {
             .login-container {
                 padding: 30px 20px;
@@ -143,6 +203,12 @@
             <h1>Create Account</h1>
             <p>Join us today to get started</p>
         </div>
+
+        @if(session('success'))
+            <div class="alert alert-success">
+                {{ session('success') }}
+            </div>
+        @endif
 
         @if($errors->any())
             <div class="alert alert-error">
@@ -171,9 +237,36 @@
                 @enderror
             </div>
 
+            <!-- Role Selection -->
+            <div class="form-group">
+                <label>I want to register as</label>
+
+                <!-- Option 1: Stylish role cards -->
+                <div id="roleCards">
+                    <div class="role-card" data-role="driver">
+                        <div class="role-title">🚗 Driver</div>
+                        <div class="role-description">Drive and earn money by completing trips</div>
+                    </div>
+                    <div class="role-card" data-role="host">
+                        <div class="role-title">🏠 Host</div>
+                        <div class="role-description">Host events and manage your properties</div>
+                    </div>
+                </div>
+
+                <!-- Hidden input for role selection -->
+                <input type="hidden" id="role" name="role" value="{{ old('role', 'driver') }}">
+
+                @error('role')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
+                <div class="help-text">
+                    Password must be at least 8 characters with uppercase, lowercase, numbers, and symbols.
+                </div>
                 @error('password')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
@@ -193,10 +286,63 @@
     </div>
 
     <script>
+        // Role selection with cards
+        const roleCards = document.querySelectorAll('.role-card');
+        const roleInput = document.getElementById('role');
+
+        roleCards.forEach(card => {
+            card.addEventListener('click', function () {
+                // Remove selected class from all cards
+                roleCards.forEach(c => c.classList.remove('selected'));
+
+                // Add selected class to clicked card
+                this.classList.add('selected');
+
+                // Update hidden input value
+                const role = this.getAttribute('data-role');
+                roleInput.value = role;
+            });
+        });
+
+        // Set default selected card based on old value or default
+        const selectedRole = roleInput.value;
+        const defaultCard = document.querySelector(`.role-card[data-role="${selectedRole}"]`);
+        if (defaultCard) {
+            defaultCard.classList.add('selected');
+        }
+
+        // Form submission handling
         document.getElementById('registerForm').addEventListener('submit', function (e) {
             const btn = document.getElementById('registerBtn');
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('password_confirmation').value;
+
+            // Client-side password validation
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                btn.disabled = false;
+                return false;
+            }
+
+            // Disable button to prevent double submission
             btn.disabled = true;
             btn.textContent = 'Creating account...';
+        });
+
+        // Real-time password strength indicator (optional)
+        const passwordInput = document.getElementById('password');
+        passwordInput.addEventListener('input', function () {
+            const password = this.value;
+            let strength = 0;
+
+            if (password.length >= 8) strength++;
+            if (password.match(/[a-z]/) && password.match(/[A-Z]/)) strength++;
+            if (password.match(/\d/)) strength++;
+            if (password.match(/[^a-zA-Z\d]/)) strength++;
+
+            // You can add a strength meter div and update it here
+            // This is optional but improves UX
         });
     </script>
 </body>

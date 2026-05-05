@@ -17,9 +17,25 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
+        // Admin Account
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'System Admin',
+            'email' => 'admin@example.com',
+            'role' => 'admin',
+        ]);
+
+        // Driver Account
+        User::factory()->create([
+            'name' => 'Professional Driver',
+            'email' => 'driver@example.com',
+            'role' => 'driver',
+        ]);
+
+        // Host Account
+        User::factory()->create([
+            'name' => 'Property Host',
+            'email' => 'host@example.com',
+            'role' => 'host',
         ]);
     }
 }

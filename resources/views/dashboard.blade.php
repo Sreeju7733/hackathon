@@ -1,113 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+@section('title', 'Dashboard')
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            min-height: 100vh;
-        }
+@section('content')
+<div class="card" style="margin-bottom: 24px;">
+    <h2 class="card-title">
+        <i class="fas fa-hand-wave text-primary"></i>
+        Welcome, {{ auth()->user()->name }}
+    </h2>
+    <p>You are successfully logged in to the secure portal. Based on your role, you can access different areas of the platform.</p>
+</div>
 
-        .navbar {
-            background-color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+<div class="grid">
+    <div class="card">
+        <h3 class="card-title"><i class="fas fa-user-circle"></i> Profile Details</h3>
+        <p style="color: var(--text-muted); margin-bottom: 10px;"><strong>Email:</strong> {{ auth()->user()->email }}</p>
+        <p style="color: var(--text-muted); margin-bottom: 10px;"><strong>Role:</strong> {{ ucfirst(auth()->user()->role) }}</p>
+        <p style="color: var(--text-muted); margin-bottom: 20px;"><strong>Member Since:</strong> {{ auth()->user()->created_at->format('M Y') }}</p>
+        <button style="color: var(--primary); font-weight: 600; font-size: 0.9rem;">Edit Profile →</button>
+    </div>
 
-        .navbar h1 {
-            font-size: 1.5rem;
-            color: #667eea;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .logout-btn {
-            background: none;
-            border: 1px solid #667eea;
-            color: #667eea;
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background-color: #667eea;
-            color: white;
-        }
-
-        .content {
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background-color: white;
-            padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .alert {
-            padding: 1rem;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-        }
-
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-    </style>
-</head>
-
-<body>
-    <nav class="navbar">
-        <h1>Hackathon Portal</h1>
-        <div class="user-info">
-            <span>Welcome, {{ Auth::user()->name }}</span>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="logout-btn">Logout</button>
-            </form>
-        </div>
-    </nav>
-
-    <div class="content">
-        @if(session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        <div class="card">
-            <h2>Your Dashboard</h2>
-            <p style="margin-top: 1rem; color: #666;">
-                You are successfully logged in to the secure portal. From here, you can manage your projects and team registrations.
-            </p>
+    <div class="card">
+        <h3 class="card-title"><i class="fas fa-bell"></i> Notifications</h3>
+        <p style="color: var(--text-muted); margin-bottom: 15px;">No new notifications at this time.</p>
+        <div style="font-size: 0.85rem; color: #64748b; background: #f1f5f9; padding: 10px; border-radius: 8px;">
+            Stay tuned for system updates and hackathon announcements!
         </div>
     </div>
-</body>
-
-</html>
+</div>
+@endsection

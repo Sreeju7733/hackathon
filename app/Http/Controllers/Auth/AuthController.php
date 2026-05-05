@@ -42,7 +42,7 @@ class AuthController extends Controller
         if (!$user || !Hash::check($request->password, $user->password)) {
             // Increment failed attempts
             $this->incrementFailedAttempts($request);
-            
+
             if ($user) {
                 $this->incrementFailedLoginAttempts($user);
             }
@@ -59,6 +59,13 @@ class AuthController extends Controller
             ]);
         }
 
+        // Check if user has a valid role
+        if (!$this->hasValidRole($user)) {
+            throw ValidationException::withMessages([
+                'email' => ['Your account does not have a valid role assigned. Please contact support.'],
+            ]);
+        }
+
         // Clear rate limiting on successful login
         $this->clearRateLimit($request);
         $this->clearFailedAttempts($user);
@@ -72,9 +79,8 @@ class AuthController extends Controller
         // Log audit trail
         $this->logSuccessfulLogin($request, $user);
 
-        // Redirect to intended URL or home
-        return redirect()->intended('/dashboard')
-            ->with('success', 'Welcome back! You have successfully logged in.');
+        // Redirect based on user role
+        return $this->redirectBasedOnRole($user);
     }
 
     /**
@@ -82,6 +88,16 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
+        // Log logout activity
+        if (Auth::check()) {
+            \Log::channel('stack')->info('User logged out', [
+                'user_id' => Auth::id(),
+                'user_email' => Auth::user()->email,
+                'ip' => $request->ip(),
+                'timestamp' => now(),
+            ]);
+        }
+
         Auth::logout();
 
         $request->session()->invalidate();
@@ -89,6 +105,36 @@ class AuthController extends Controller
 
         return redirect('/login')
             ->with('success', 'You have been successfully logged out.');
+    }
+
+    /**
+     * Redirect users based on their role
+     */
+    protected function redirectBasedOnRole(User $user)
+    {
+        $route = match ($user->role) {
+            'admin' => '/admin/dashboard',
+            'host' => '/host/dashboard',
+            'driver' => '/driver/dashboard',
+            default => '/dashboard'
+        };
+
+        $message = match ($user->role) {
+            'admin' => 'Welcome back, Administrator!',
+            'host' => 'Welcome back, Host!',
+            'driver' => 'Welcome back, Driver!',
+            default => 'Welcome back!'
+        };
+
+        return redirect()->intended($route)->with('success', $message);
+    }
+
+    /**
+     * Check if user has a valid role
+     */
+    protected function hasValidRole(User $user): bool
+    {
+        return in_array($user->role, ['admin', 'host', 'driver']);
     }
 
     /**
@@ -162,10 +208,10 @@ class AuthController extends Controller
      */
     protected function logSuccessfulLogin(Request $request, User $user)
     {
-        // You can create a login_logs table to store this information
         \Log::channel('stack')->info('User logged in', [
             'user_id' => $user->id,
             'user_email' => $user->email,
+            'user_role' => $user->role,
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
             'timestamp' => now(),
