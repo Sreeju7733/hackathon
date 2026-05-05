@@ -251,7 +251,7 @@
                 <div class="logo-box">
                     <i class="fas fa-bolt"></i>
                 </div>
-                <span class="brand-name">VoltCharge</span>
+                <span class="brand-name">chrgbnb</span>
             </div>
 
             <div class="sidebar-menu">
