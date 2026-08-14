@@ -580,15 +580,14 @@ html[data-workspace-transition="others-to-maths"]::view-transition-new(lesson-su
 .equation-row {
   width: 100%;
   display: grid;
-  grid-template-columns: 8px 1fr 20px;
+  grid-template-columns: 8px minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 10px;
-  padding: 11px 10px;
+  gap: 8px;
+  padding: 10px;
   color: #697487;
   border: 0;
   border-radius: 8px;
   background: transparent;
-  cursor: pointer;
   text-align: left;
   font-size: 15px;
   transition:
@@ -596,53 +595,11 @@ html[data-workspace-transition="others-to-maths"]::view-transition-new(lesson-su
     color 0.16s;
 }
 
-.equation-row.is-deleting {
-  pointer-events: none;
-  animation: history-item-delete 0.28s cubic-bezier(0.65, 0, 0.35, 1) both;
-}
-
-.equation-row.active {
-  color: var(--ink);
-  background: var(--subtle);
-}
-
-.equation-row.disabled {
-  color: #9aa5b6;
-  background: #f7f8fb;
-}
-
-.equation-row.disabled .equation-swatch {
-  opacity: 0.34;
-}
-
-.editable-equation {
-  min-width: 0;
-  overflow-wrap: anywhere;
-  color: #223047;
-  font-family: "Cambria Math", Cambria, serif;
-  font-size: 18px;
-}
-
-.selected-token {
-  display: inline-grid;
-  min-width: 1.1em;
-  place-items: center;
-  margin: 0 1px;
-  border-radius: 4px;
-  outline: 2px solid #2563eb;
-  background: #dbeafe;
-  color: #174ea6;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-}
-
-.equation-row:hover {
-  background: var(--subtle);
-}
-
 .equation-swatch {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .eye {
