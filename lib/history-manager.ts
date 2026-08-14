@@ -20,7 +20,10 @@ export class HistoryManager {
 
   private cloneStrokes(strokes: Stroke[]): Stroke[] {
     return strokes.map((s) => ({
-      points: s.points.map((p) => ({ ...p })),
+      ...s,
+      raw: s.raw ? s.raw.map((p) => ({ ...p })) : [],
+      points: s.points ? s.points.map((p) => ({ ...p })) : [],
+      bounds: s.bounds ? { ...s.bounds } : { minX: 0, maxX: 0, minY: 0, maxY: 0, width: 0, height: 0 },
     }));
   }
 

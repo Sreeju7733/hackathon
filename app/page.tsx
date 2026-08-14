@@ -879,8 +879,11 @@ export default function Home() {
                   }
                 >
                   <option value="">System default</option>
-                  {voices.map((voice) => (
-                    <option key={voice.voiceURI} value={voice.voiceURI}>
+                  {voices.map((voice, idx) => (
+                    <option
+                      key={`${voice.voiceURI || voice.name || "voice"}-${idx}`}
+                      value={voice.voiceURI}
+                    >
                       {voice.name} ({voice.lang})
                     </option>
                   ))}
