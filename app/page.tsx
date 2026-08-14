@@ -472,18 +472,14 @@ export default function Home() {
         },
         ...sessions,
       ]);
-      if (workspaceMode === "others") {
-        setRecognition({
-          ...result,
-          error: "Formula recognized. Preparing the document…",
-        });
-        prepareLesson(result, "formula", true);
-      } else
-        setRecognition({
-          ...result,
-          error:
-            "This is not graphable in Maths mode. Switch to Others for an explanation.",
-        });
+      setRecognition({
+        ...result,
+        error:
+          workspaceMode === "others"
+            ? "Formula recognized. Preparing the document…"
+            : "Formula recognized. Preparing the document in Others…",
+      });
+      prepareLesson(result, "formula", true);
       return false;
     }
     setEquations((items) => [
@@ -529,6 +525,11 @@ export default function Home() {
     setSelectedNumberIndex(0);
     if (airInputMode !== "whiteboard") setClearSignal((value) => value + 1);
     setRecognition(empty);
+    // Prepare both the graph explanation and the document view in the same
+    // shot, so Explain and switching to Others are instant instead of each
+    // triggering their own separate generation later.
+    prepareLesson(graphResult, "graph", false);
+    prepareLesson(graphResult, "formula", false);
     return true;
   };
   const playGraphNarration = () => {
