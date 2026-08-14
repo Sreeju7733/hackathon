@@ -1,6 +1,6 @@
 {
-  "name": "Sign2Graph",
-  "short_name": "Sign2Graph",
+  "name": "PlotlyX",
+  "short_name": "PlotlyX",
   "description": "Draw mathematical and scientific equations in the air and explore how they move.",
   "start_url": "/",
   "scope": "/",

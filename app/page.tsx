@@ -690,7 +690,10 @@ export default function Home() {
         >
           <IconMenu2 size={20} />
         </button>
-        <a href="/" className="logo">
+        <a className="brand" href="#workspace">
+          <span className="brand-mark">
+            <span />
+          </span>
           PlotlyX
         </a>
         <div
