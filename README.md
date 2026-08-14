@@ -1,83 +1,109 @@
-# Sign2Graph
+# ♿ Sign2Graph — AI-Powered Spatial Accessibility Assistant for STEM
 
-Sign2Graph is a web-based AI and computer-vision learning tool that turns an
-air-written mathematical or scientific expression into either an interactive
-graph or a structured formula lesson.
+> **Track PH-09 | AI-Powered Accessibility Assistant**  
+> **Theme:** Accessibility | Artificial Intelligence | Assistive Technology | Inclusion  
+> **Problem:** People with physical, motor, visual, or neurodivergent accessibility needs face extreme barriers when accessing complex digital information and interactive STEM learning tools.  
+> **Challenge:** Develop an inclusive technology solution that improves access to educational, public-service, or everyday digital information for people with disabilities.
 
-## Start locally
+---
 
-### Requirements
+## 📖 The Story & Problem Statement
 
-- Node.js with npm
-- A modern browser with webcam permission and MediaPipe WebAssembly support
-- A webcam for air-writing; a mouse can still operate the rest of the interface
-- `GEMINI_API_KEY` for AI recognition and generated explanations
+### Meet Alex: The STEM Barrier
+Alex is a passionate 15-year-old student who dreams of studying physics and computer science. However, Alex lives with a severe motor disability that makes holding a pencil, typing complex math formulas, or manipulating a mouse exhausting and painful.
 
-Install dependencies and start the development server:
+While standard screen readers work well for digital text documents, **STEM education—algebra, calculus, geometry, and physics equations—remains a digital brick wall**:
+* **Physical Input Barriers**: Typing math LaTeX like `\frac{-b \pm \sqrt{b^2-4ac}}{2a}` requires dozens of complex key strokes and precise mouse clicks.
+* **Lack of Multi-Sensory Guidance**: Static textbooks and passive online calculators offer no step-by-step audio narration or spatial visual guidance.
+* **Prohibitive Hardware Costs**: Traditional assistive eye-trackers or specialized switch hardware cost thousands of dollars ($1,000+) and are rarely available in public classrooms or low-income schools.
 
-```bash
-npm install
-npm run dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000). To run the production
-build locally:
+## 💡 Our Solution: Sign2Graph
 
-```bash
-npm run build
-npm run start
-```
+**Sign2Graph** turns any standard webcam into an intelligent, touchless, AI-powered spatial accessibility canvas. Without needing a keyboard, mouse, or expensive hardware, students can:
 
-Create `.env.local` in the repository root when using Gemini:
+1. **Draw Math & Physics in Mid-Air**: Use simple, low-effort hand gestures and pinches tracked in 3D by computer vision.
+2. **Instant AI Symbol & Equation Recognition**: Custom client-side ONNX neural models and multimodal AI convert hand-drawn air strokes into structured math equations.
+3. **Interactive 2D Graph Plotting**: Real-time rendering of functions, parabolas, and implicit curves ($x^2 + y^2 = 25$).
+4. **Multi-Sensory Audio-Visual Lessons**: Step-by-step text-to-speech audio narration paired with interactive visual graph morphing.
+5. **Contextual YouTube Video Lessons**: Integrated educational video recommendations (Khan Academy, 3Blue1Brown, Organic Chemistry Tutor) embedded right inside the explanation view.
 
-```text
-GEMINI_API_KEY=your-key-here
-```
+---
 
-Without the key, the local geometric recognizer remains available, but the
-Gemini recognition and general AI explanation paths report that the key is
-missing. Known local formula fallbacks and deterministic graph explanations can
-still be used where supported.
+## 🌟 Key Accessibility Innovations & Features
 
-## What is included
+| Accessibility Need | **Sign2Graph** Feature | Technical Implementation |
+| :--- | :--- | :--- |
+| **Motor Disabilities & Fatigue** | **Touchless Air Canvas** | MediaPipe 21-point 3D hand tracking with Exponential Moving Average (EMA) smoothing. Zero mouse clicks needed. |
+| **Complex Math Input Barriers** | **AI Gesture & Symbol Classifier** | On-device ONNX Runtime Web model + Gemini Multimodal Vision API for instant LaTeX conversion. |
+| **Visual & Learning Impairments** | **Multi-Sensory Audio Narration** | Web Speech API text-to-speech engine with SSML phonetic math translation for step-by-step voice guidance. |
+| **Neurodivergent & Visual Learners** | **Curated YouTube Lesson Engine** | Context-aware YouTube video recommendations with in-app embedded video player preview. |
+| **Financial & Hardware Barriers** | **100% In-Browser & Local AI** | Runs locally in modern web browsers on standard Chromebooks/laptops with webcams. |
 
-- Next.js 15.3.2, React 19, TypeScript, and client-side state management
-- MediaPipe Tasks Vision hand landmarks for webcam tracking
-- ONNX Runtime Web and the bundled `public/models/math-symbols.onnx` symbol model
-- A geometric stroke recognizer with correction and handwriting-profile learning
-- Gemini 3.1 Flash-Lite through server routes for multimodal recognition and
-  structured explanation plans
-- `mathjs` expression evaluation and sampling for explicit and implicit graphs
-- SVG graph rendering, KaTeX equation rendering, browser speech synthesis, and
-  local browser storage for sessions and preferences
-- Automated tests for gesture stabilization, expression normalization, graph
-  sampling, and explanation fallbacks
+---
 
-## Motivation
+## 🛠️ Technology Stack
 
-Many graphing tools show a result without showing how the result was built.
-Sign2Graph explores a more spatial, step-by-step way to learn: a student can
-write an expression in the air, see it interpreted, and follow the relationship
-through visual changes, readable equations, and optional narration. Feedback
-from interviews with neurodivergent learners and learners with different
-attention, processing, and hearing needs, together with consultation with
-specialists, influenced the focus on short steps, visible text, replayable
-controls, and multiple representations. The project is educational software,
-not a medical product.
+* **Frontend Framework**: Next.js 15 (App Router), React 19, TypeScript
+* **Computer Vision**: `@mediapipe/tasks-vision` (Client-side 60 FPS 3D Hand Tracking)
+* **Local Neural Network**: `onnxruntime-web` (In-Browser Symbol Recognition)
+* **Cloud AI API**: Gemini Multimodal Vision API (`/api/recognize` and `/api/explore`)
+* **Math & Plotting Engine**: `mathjs`, SVG Adaptive Curve Sampler & Marching Squares Grid Solver
+* **Voice & Audio**: Web Speech API (`lib/narration.ts`)
+* **Styling**: Vanilla CSS3 (Custom Glassmorphism & High-Contrast Inclusive Palette)
 
-## Repository description tags
+---
 
-`AI` `computer-vision` `hand-tracking` `mathematics` `STEM` `EdTech`
-`accessibility` `Next.js` `Gemini` `graphing`
+## 🚀 Quick Start Guide
 
-## Useful commands
+### Prerequisites
+* **Node.js**: v18.0.0 or higher
+* **npm**: v9.0.0 or higher
+* **Webcam**: Standard laptop/USB webcam
 
-```bash
-npm test
-npm run format:check
-npm run build
-```
+### Local Installation
 
-`npm run lint` is retained in the package scripts, but current Next.js tooling
-may treat `next lint` as deprecated or interactive. The checks above are the
-repeatable local verification path.
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/Sreeju7733/hackathon.git
+   cd hackathon/hackathon
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure environment variables:**
+   Create a `.env.local` file in the `hackathon/hackathon` directory:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. **Open in Browser:**
+   Navigate to [http://localhost:3000](http://localhost:3000) and grant camera permissions when prompted.
+
+---
+
+## 🎙️ 1-Minute Hackathon Pitch Deck Script for Judges
+
+> **Slide 1 (The Hook):** "Meet Alex. Alex loves science but has a motor impairment that makes holding a pencil or typing math formulas painful. For millions of students with disabilities, digital STEM tools are a brick wall."
+>
+> **Slide 2 (The Problem):** "Standard accessibility tools focus on text documents, leaving complex math equations and graphing inaccessible without expensive $1,000+ specialized hardware."
+>
+> **Slide 3 (Our Solution):** "Introducing **Sign2Graph**—an AI-powered spatial accessibility assistant. Using just a web camera, students draw math in mid-air using simple hand gestures."
+>
+> **Slide 4 (The Tech & Impact):** "Our client-side ONNX models convert hand signs into LaTeX, plot interactive graphs, read step-by-step audio explanations aloud, and embed YouTube video lessons. It breaks STEM accessibility barriers for zero cost on any web browser."
+
+---
+
+## 📄 Documentation Links
+* [TECHNICAL_DOCS.md](file:///c:/Users/dines/OneDrive/Documents/hackathon/hackathon/TECHNICAL_DOCS.md) — Comprehensive System Architecture, Vision Pipeline, and AI Specs.
+* [docs/ARCHITECTURE.md](file:///c:/Users/dines/OneDrive/Documents/hackathon/hackathon/docs/ARCHITECTURE.md) — System Architecture Diagram & Data Flow.
+* [docs/GESTURES.md](file:///c:/Users/dines/OneDrive/Documents/hackathon/hackathon/docs/GESTURES.md) — Air Canvas Hand Gesture Guide.

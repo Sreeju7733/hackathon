@@ -9,7 +9,7 @@ import {
   IconPointFilled,
   IconTrash,
 } from "@tabler/icons-react";
-import type { HandLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
+import { FilesetResolver, HandLandmarker, type NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { classifyGesture, GestureStabilizer, type GesturePose } from "../lib/gestures";
 import { getBounds, type Point, type Stroke } from "../lib/recognition";
@@ -791,15 +791,14 @@ export function AirCanvas({
     try {
       setCameraState("loading");
       setMessage("Loading hand tracking...");
-      const vision = await import("@mediapipe/tasks-vision"),
-        fileset = await vision.FilesetResolver.forVisionTasks(WASM_ROOT);
+      const fileset = await FilesetResolver.forVisionTasks(WASM_ROOT);
       // MediaPipe's WASM runtime logs an informational XNNPACK delegate
       // message via console.info on init; Next.js's dev overlay treats it
       // as an error, so it's muted for the duration of detector creation.
       const originalConsoleInfo = console.info;
       console.info = () => {};
       try {
-        detectorRef.current = await vision.HandLandmarker.createFromOptions(fileset, {
+        detectorRef.current = await HandLandmarker.createFromOptions(fileset, {
           baseOptions: { modelAssetPath: HAND_MODEL },
           runningMode: "VIDEO",
           numHands: 2,
