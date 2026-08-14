@@ -7,6 +7,7 @@ import {
   IconVolume,
 } from "@tabler/icons-react";
 import { MathPreview } from "./MathPreview";
+import { YouTubeRecommendations } from "./YouTubeRecommendations";
 import type { ExplanationPlan } from "../lib/explanation";
 
 export function PhysicsPanel({
@@ -97,6 +98,8 @@ export function PhysicsPanel({
         </button>
       </div>
       <small className="narration-status">{status}</small>
+
+      <YouTubeRecommendations plan={plan} />
     </section>
   );
 }

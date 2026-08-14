@@ -15,7 +15,6 @@ import {
   IconSettings,
   IconX,
   IconZoomInArea,
-  IconAtom,
   IconMenu2,
   IconMath,
   IconAtom2,
@@ -788,21 +787,6 @@ export default function Home() {
           <button className="header-link" onClick={() => setTutorialOpen(true)}>
             <IconHelpCircle size={18} />
             Help
-          </button>
-          <button
-            className="header-link"
-            onClick={() => {
-              const result = formulaCandidate || {
-                ...empty,
-                latex: "F=ma",
-                canonicalExpression: "F=m*a",
-                valid: true,
-              };
-              switchWorkspace("others");
-              prepareLesson(result, "formula", true);
-            }}
-          >
-            <IconAtom size={17} /> Explore formula
           </button>
           <span className="connection">
             <span className="status-light" />

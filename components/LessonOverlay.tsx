@@ -9,6 +9,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { MathPreview } from "./MathPreview";
+import { YouTubeRecommendations } from "./YouTubeRecommendations";
 import { GRAPH_HEIGHT, GRAPH_WIDTH, DEFAULT_VIEWPORT, segmentPath } from "../lib/graph";
 import { sampleExpression } from "../lib/graph";
 import type { ExplanationPlan, LessonStep } from "../lib/explanation";
@@ -156,6 +157,10 @@ function FormulaVisual({
             </div>
           )}
         </>
+      )}
+
+      {index === plan.steps.length - 1 && (
+        <YouTubeRecommendations plan={plan} />
       )}
     </section>
   );
