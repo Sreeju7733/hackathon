@@ -522,7 +522,7 @@ export default function Home() {
     );
     setSelectionActive(false);
     setSelectedNumberIndex(0);
-    if (airInputMode !== "whiteboard") setClearSignal((value) => value + 1);
+    setClearSignal((value) => value + 1);
     setRecognition(empty);
     // Prepare both the graph explanation and the document view in the same
     // shot, so both Maths and Others are ready immediately instead of
@@ -798,6 +798,7 @@ export default function Home() {
                 canonicalExpression: "F=m*a",
                 valid: true,
               };
+              switchWorkspace("others");
               prepareLesson(result, "formula", true);
             }}
           >
@@ -1103,7 +1104,7 @@ export default function Home() {
                         ? aiState.message
                         : recognition.error ||
                           (useAiRecognition && strokes.length
-                            ? "Point at Add to graph in the camera for 5 seconds, or pinch it."
+                            ? "Reads automatically 5s after you stop, or press Add to graph now."
                             : recognition.confidence
                               ? `${recognition.confidence}% · ${
                                   recognition.valid
@@ -1129,21 +1130,13 @@ export default function Home() {
                     <button
                       className={workspaceMode === "maths" ? "selected" : ""}
                       disabled={!lastExpression.graphable && workspaceMode === "maths"}
-                      onClick={() => {
-                        switchWorkspace("maths");
-                        if (lastExpression.graphable) {
-                          commitEquation(lastExpression);
-                        }
-                      }}
+                      onClick={() => switchWorkspace("maths")}
                     >
                       Graph
                     </button>
                     <button
                       className={workspaceMode === "others" ? "selected" : ""}
-                      onClick={() => {
-                        switchWorkspace("others");
-                        prepareLesson(lastExpression, "formula", true);
-                      }}
+                      onClick={() => switchWorkspace("others")}
                     >
                       Document
                     </button>
