@@ -1,0 +1,35 @@
+{
+  "name": "sign2graph",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "clean": "node -e \"require('fs').rmSync('.next',{recursive:true,force:true})\"",
+    "dev": "next dev",
+    "dev:lan": "next dev -H 0.0.0.0 --experimental-https",
+    "build": "next build",
+    "start": "next start",
+    "format": "prettier --write app components lib scripts tests package.json tsconfig.json",
+    "format:check": "prettier --check app components lib scripts tests package.json tsconfig.json",
+    "lint": "next lint",
+    "test": "tsx --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "1.0.1",
+    "@tabler/icons-react": "^3.34.1",
+    "@types/katex": "^0.16.8",
+    "katex": "^0.18.1",
+    "mathjs": "^15.2.0",
+    "next": "^15.3.2",
+    "onnxruntime-web": "^1.27.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.0.6",
+    "@types/react-dom": "^19.0.2",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.8.3"
+  }
+}
