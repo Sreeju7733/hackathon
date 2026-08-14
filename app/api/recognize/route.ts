@@ -113,7 +113,7 @@ export async function POST(request: Request) {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: requestBody,
-          signal: AbortSignal.timeout(13_000),
+          signal: AbortSignal.timeout(5_000),
         });
         if (response.ok || response.status === 429) break;
         if (attempt === MAX_ATTEMPTS - 1) break;

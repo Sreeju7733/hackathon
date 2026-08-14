@@ -532,6 +532,33 @@ export default function Home() {
     prepareLesson(graphResult, "formula", false);
     return true;
   };
+  const plotFormulaOnGraph = () => {
+    if (!formulaCandidate) return;
+    const graphInput = normalizeCanonicalExpression(formulaCandidate.canonicalExpression);
+    if (!graphInput.ok) return;
+    const graphResult = { ...formulaCandidate, canonicalExpression: graphInput.value };
+    const traces = sampleExpression(graphInput.value);
+    setEquations((items) => [
+      ...items,
+      {
+        id: crypto.randomUUID(),
+        latex: graphResult.latex,
+        canonicalExpression: graphResult.canonicalExpression,
+        color: EQUATION_COLORS[items.length % EQUATION_COLORS.length],
+        visible: true,
+        traces,
+      },
+    ]);
+    setLastExpression(graphResult);
+    setGraphView(
+      fitViewport([
+        ...equations.filter((item) => item.visible).flatMap((item) => item.traces),
+        ...traces,
+      ]),
+    );
+    setWorkspaceMode("maths");
+    prepareLesson(graphResult, "graph", false);
+  };
   const playGraphNarration = () => {
     if (!graphLesson) return;
     if (graphLesson.playing) {
@@ -1233,6 +1260,11 @@ export default function Home() {
                 lesson && value >= lesson.steps.length - 1 ? 0 : value + 1,
               );
             }}
+            graphable={
+              !!formulaCandidate &&
+              normalizeCanonicalExpression(formulaCandidate.canonicalExpression).ok
+            }
+            onPlotGraph={plotFormulaOnGraph}
           />
         )}
       </section>

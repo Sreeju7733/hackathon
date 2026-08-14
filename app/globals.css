@@ -438,6 +438,20 @@ html[data-workspace-transition="others-to-maths"]::view-transition-new(lesson-su
   color: #1d4e98;
   font-size: 32px;
 }
+.plot-graph-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  background: var(--blue);
+  color: #fff;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
 .physics-metadata {
   margin: 22px 0;
   color: #59697e;

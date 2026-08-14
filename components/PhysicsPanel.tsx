@@ -1,6 +1,11 @@
 "use client";
 
-import { IconPlayerPause, IconPlayerPlay, IconVolume } from "@tabler/icons-react";
+import {
+  IconChartLine,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconVolume,
+} from "@tabler/icons-react";
 import { MathPreview } from "./MathPreview";
 import type { ExplanationPlan } from "../lib/explanation";
 
@@ -12,6 +17,8 @@ export function PhysicsPanel({
   defaultSubject,
   onPlay,
   onNext,
+  graphable,
+  onPlotGraph,
 }: {
   plan: ExplanationPlan | null;
   activeStep: number;
@@ -20,6 +27,8 @@ export function PhysicsPanel({
   defaultSubject: string;
   onPlay: () => void;
   onNext: () => void;
+  graphable?: boolean;
+  onPlotGraph?: () => void;
 }) {
   if (!plan)
     return (
@@ -44,6 +53,11 @@ export function PhysicsPanel({
         <MathPreview
           latex={step.blocks.find((block) => block.type === "latex")?.content || ""}
         />
+        {graphable && onPlotGraph && (
+          <button className="plot-graph-button" onClick={onPlotGraph}>
+            <IconChartLine size={16} /> Plot on graph
+          </button>
+        )}
       </header>
       {formula && (
         <div className="physics-metadata">
