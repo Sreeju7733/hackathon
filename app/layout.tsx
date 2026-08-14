@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Sign2Graph",
+  title: "PlotlyX",
   description: "Draw equations in the air and explore how they move.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Sign2Graph",
+    title: "PlotlyX",
   },
   icons: {
     icon: "/icon-192.png",

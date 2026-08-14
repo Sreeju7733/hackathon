@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
-export const maxDuration = 15;
+export const maxDuration = 30;
 
 const instruction = [
   "You are an OCR engine for air-drawn mathematics.",
@@ -108,7 +108,7 @@ export async function POST(request: Request) {
             },
           },
         }),
-        signal: AbortSignal.timeout(12_000),
+        signal: AbortSignal.timeout(25_000),
       },
     );
     if (!response.ok) {

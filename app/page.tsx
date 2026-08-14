@@ -5,8 +5,6 @@ import { flushSync } from "react-dom";
 import {
   IconArrowsLeftRight,
   IconArrowsMove,
-  IconBrandGithub,
-  IconBrandInstagram,
   IconHelpCircle,
   IconClick,
   IconEraser,
@@ -692,11 +690,8 @@ export default function Home() {
         >
           <IconMenu2 size={20} />
         </button>
-        <a className="brand" href="#workspace">
-          <span className="brand-mark">
-            <span />
-          </span>
-          sign2graph
+        <a href="/" className="logo">
+          PlotlyX
         </a>
         <div
           className="workspace-switch"
@@ -740,24 +735,6 @@ export default function Home() {
           >
             <IconAtom size={17} /> Explore formula
           </button>
-          <a
-            className="header-link"
-            href="https://github.com/areteeem"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <IconBrandGithub size={17} />
-            GitHub
-          </a>
-          <a
-            className="header-link"
-            href="https://instagram.com/ar_kch"
-            target="_blank"
-            rel="noreferrer"
-          >
-            <IconBrandInstagram size={17} />
-            Instagram
-          </a>
           <span className="connection">
             <span className="status-light" />
             {preferredHand} hand
