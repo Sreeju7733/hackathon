@@ -2,8 +2,11 @@
 import {
   IconCamera,
   IconCameraOff,
+  IconEraser,
   IconLoader2,
+  IconPencil,
   IconPointFilled,
+  IconTrash,
 } from "@tabler/icons-react";
 import type { HandLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -150,6 +153,9 @@ export function AirCanvas({
       progress: 0,
     });
   const [gesturePose, setGesturePose] = useState<GesturePose>("hover");
+  const [inputMode, setInputMode] = useState<"camera" | "whiteboard">("camera");
+  const [whiteboardErasing, setWhiteboardErasing] = useState(false);
+  const drawingPointerIdRef = useRef<number | null>(null);
   useEffect(() => {
     callbacksRef.current = {
       onStrokeComplete,
@@ -333,6 +339,93 @@ export function AirCanvas({
     previousRef.current = null;
     pinchingRef.current = false;
     if (stateRef.current.interactionMode === "canvas") setMode("hover");
+  };
+  const eraseAt = (cursor: Point) => {
+    const hit = strokesRef.current.filter(
+      (stroke) => !stroke.erased && strokeTouches(stroke, cursor, eraserRadius),
+    );
+    if (hit.length) {
+      if (!eraseSnapshotRef.current) {
+        snapshot();
+        eraseSnapshotRef.current = true;
+      }
+      const ids = new Set(hit.map((stroke) => stroke.id));
+      strokesRef.current = strokesRef.current.map((stroke) =>
+        ids.has(stroke.id) ? { ...stroke, erased: true } : stroke,
+      );
+      eraseChangedRef.current = true;
+      renderStrokes();
+    }
+  };
+  const clearCanvas = () => {
+    snapshot();
+    strokesRef.current = [];
+    activeRef.current = [];
+    renderStrokes();
+    drawCursor();
+    emit();
+  };
+  const relativePoint = (event: React.PointerEvent): Point => {
+    const root = rootRef.current;
+    if (!root) return { x: 0, y: 0 };
+    const rect = root.getBoundingClientRect();
+    return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+  };
+  const handleWhiteboardPointerDown = (event: React.PointerEvent) => {
+    if (inputMode !== "whiteboard" || disabled) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    drawingPointerIdRef.current = event.pointerId;
+    const point = relativePoint(event);
+    if (whiteboardErasing) {
+      eraseAt(point);
+      drawCursor(point, true);
+    } else {
+      activeRef.current = [point];
+      previousRef.current = point;
+      pinchingRef.current = true;
+      setMode("drawing");
+      drawCursor(point, false, true);
+    }
+  };
+  const handleWhiteboardPointerMove = (event: React.PointerEvent) => {
+    if (inputMode !== "whiteboard" || drawingPointerIdRef.current !== event.pointerId)
+      return;
+    const point = relativePoint(event);
+    if (whiteboardErasing) {
+      eraseAt(point);
+      drawCursor(point, true);
+      return;
+    }
+    if (!pinchingRef.current) return;
+    const previous = previousRef.current;
+    if (!previous || distance(previous, point) > 2.2) activeRef.current.push(point);
+    previousRef.current = point;
+    drawCursor(point, false, true);
+  };
+  const handleWhiteboardPointerUp = (event: React.PointerEvent) => {
+    if (inputMode !== "whiteboard" || drawingPointerIdRef.current !== event.pointerId)
+      return;
+    drawingPointerIdRef.current = null;
+    if (whiteboardErasing) {
+      eraseSnapshotRef.current = false;
+      if (eraseChangedRef.current) {
+        eraseChangedRef.current = false;
+        emit();
+      }
+      setMode("hover");
+    } else finishStroke();
+    drawCursor();
+  };
+  const selectInputMode = (next: "camera" | "whiteboard") => {
+    if (next === inputMode) return;
+    if (next === "whiteboard" && cameraEnabledRef.current) turnOffCamera();
+    activeRef.current = [];
+    previousRef.current = null;
+    pinchingRef.current = false;
+    drawingPointerIdRef.current = null;
+    setMode("hover");
+    setInputMode(next);
+    drawCursor();
   };
   const actionAt = (cursor: Point): AirAction | null => {
     const root = rootRef.current;
@@ -645,14 +738,23 @@ export function AirCanvas({
       setMessage("Loading hand tracking...");
       const vision = await import("@mediapipe/tasks-vision"),
         fileset = await vision.FilesetResolver.forVisionTasks(WASM_ROOT);
-      detectorRef.current = await vision.HandLandmarker.createFromOptions(fileset, {
-        baseOptions: { modelAssetPath: HAND_MODEL },
-        runningMode: "VIDEO",
-        numHands: 2,
-        minHandDetectionConfidence: 0.55,
-        minHandPresenceConfidence: 0.6,
-        minTrackingConfidence: 0.6,
-      });
+      // MediaPipe's WASM runtime logs an informational XNNPACK delegate
+      // message via console.info on init; Next.js's dev overlay treats it
+      // as an error, so it's muted for the duration of detector creation.
+      const originalConsoleInfo = console.info;
+      console.info = () => {};
+      try {
+        detectorRef.current = await vision.HandLandmarker.createFromOptions(fileset, {
+          baseOptions: { modelAssetPath: HAND_MODEL },
+          runningMode: "VIDEO",
+          numHands: 2,
+          minHandDetectionConfidence: 0.55,
+          minHandPresenceConfidence: 0.6,
+          minTrackingConfidence: 0.6,
+        });
+      } finally {
+        console.info = originalConsoleInfo;
+      }
       setMessage("Requesting camera access...");
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -704,12 +806,7 @@ export function AirCanvas({
     return () => window.removeEventListener("keydown", undo);
   }, [drawCursor, renderStrokes]);
   useEffect(() => {
-    snapshot();
-    strokesRef.current = [];
-    activeRef.current = [];
-    renderStrokes();
-    drawCursor();
-    emit();
+    clearCanvas();
   }, [clearSignal, drawCursor, renderStrokes]);
   useEffect(
     () => () => {
@@ -720,16 +817,65 @@ export function AirCanvas({
     },
     [],
   );
+  const whiteboardReady = inputMode === "whiteboard";
+  const surfaceReady = cameraState === "ready" || whiteboardReady;
   return (
     <div
       ref={rootRef}
-      className={`air-canvas ${interactionMode === "move" ? "move-active" : ""}`}
+      className={`air-canvas ${interactionMode === "move" ? "move-active" : ""} ${
+        whiteboardReady ? "whiteboard-active" : ""
+      }`}
     >
-      <video ref={videoRef} className="camera-feed" muted playsInline />
+      {inputMode === "camera" && (
+        <video ref={videoRef} className="camera-feed" muted playsInline />
+      )}
       <canvas ref={canvasRef} className="stroke-layer" />
-      <canvas ref={cursorCanvasRef} className="cursor-layer" />
-      <div className="camera-overlay" />
-      {cameraState !== "ready" && (
+      <canvas
+        ref={cursorCanvasRef}
+        className="cursor-layer"
+        onPointerDown={handleWhiteboardPointerDown}
+        onPointerMove={handleWhiteboardPointerMove}
+        onPointerUp={handleWhiteboardPointerUp}
+        onPointerCancel={handleWhiteboardPointerUp}
+      />
+      {inputMode === "camera" && <div className="camera-overlay" />}
+      <div className="air-mode-toolbar">
+        <div className="air-mode-switch" role="group" aria-label="Drawing input">
+          <button
+            type="button"
+            className={inputMode === "camera" ? "active" : ""}
+            aria-pressed={inputMode === "camera"}
+            onClick={() => selectInputMode("camera")}
+          >
+            <IconCamera size={15} /> Camera
+          </button>
+          <button
+            type="button"
+            className={whiteboardReady ? "active" : ""}
+            aria-pressed={whiteboardReady}
+            onClick={() => selectInputMode("whiteboard")}
+          >
+            <IconPencil size={15} /> Whiteboard
+          </button>
+        </div>
+        <div className="air-mode-actions">
+          {whiteboardReady && (
+            <button
+              type="button"
+              className={whiteboardErasing ? "active" : ""}
+              aria-pressed={whiteboardErasing}
+              title={whiteboardErasing ? "Switch to draw" : "Switch to eraser"}
+              onClick={() => setWhiteboardErasing((value) => !value)}
+            >
+              <IconEraser size={15} />
+            </button>
+          )}
+          <button type="button" title="Clear canvas" onClick={clearCanvas}>
+            <IconTrash size={15} />
+          </button>
+        </div>
+      </div>
+      {inputMode === "camera" && cameraState !== "ready" && (
         <div className="camera-prompt">
           <div className="camera-symbol">
             {cameraState === "loading" ? (
@@ -752,7 +898,17 @@ export function AirCanvas({
           </button>
         </div>
       )}
-      {cameraState === "ready" && (
+      {whiteboardReady && (
+        <div className="whiteboard-hint">
+          <IconPointFilled size={13} />
+          <span>
+            {whiteboardErasing
+              ? "Drag to erase strokes."
+              : "Click and drag to draw. Use Add to graph when ready."}
+          </span>
+        </div>
+      )}
+      {cameraState === "ready" && inputMode === "camera" && (
         <>
           {hold.label && (
             <div
@@ -815,6 +971,27 @@ export function AirCanvas({
             </div>
           )}
         </>
+      )}
+      {whiteboardReady && (
+        <button
+          type="button"
+          className="air-add-button"
+          aria-label="Add to graph"
+          title="Add to graph"
+          onClick={() => onAction("add")}
+          disabled={disabled || !canAdd}
+        >
+          <span aria-hidden="true">+</span>
+        </button>
+      )}
+      {surfaceReady && selectionActive && whiteboardReady && (
+        <div className="air-edit-toolbar">
+          <button onClick={() => onAction("minus10")}>-10</button>
+          <button onClick={() => onAction("minus1")}>-1</button>
+          <strong>{selectedValue ?? 0}</strong>
+          <button onClick={() => onAction("plus1")}>+1</button>
+          <button onClick={() => onAction("plus10")}>+10</button>
+        </div>
       )}
     </div>
   );
