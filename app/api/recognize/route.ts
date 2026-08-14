@@ -47,14 +47,15 @@ export async function POST(request: Request) {
       { error: "AI recognition needs GEMINI_API_KEY on the server." },
       { status: 503 },
     );
+  const body = (await request.json().catch(() => null)) as { image?: string } | null;
+  if (
+    !body ||
+    typeof body.image !== "string" ||
+    !body.image.startsWith("data:image/png;base64,") ||
+    body.image.length > 1_800_000
+  )
+    return NextResponse.json({ error: "Invalid stroke image." }, { status: 400 });
   try {
-    const body = (await request.json()) as { image?: string };
-    if (
-      typeof body.image !== "string" ||
-      !body.image.startsWith("data:image/png;base64,") ||
-      body.image.length > 1_800_000
-    )
-      return NextResponse.json({ error: "Invalid stroke image." }, { status: 400 });
     const base64 = body.image.slice(body.image.indexOf(",") + 1);
     const requestBody = JSON.stringify({
       contents: [
@@ -113,7 +114,7 @@ export async function POST(request: Request) {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: requestBody,
-          signal: AbortSignal.timeout(5_000),
+          signal: AbortSignal.timeout(14_000),
         });
         if (response.ok || response.status === 429) break;
         if (attempt === MAX_ATTEMPTS - 1) break;

@@ -14,7 +14,7 @@ export const maxDuration = 35;
 const MAX_LATEX_LENGTH = 240;
 const MAX_EXPRESSION_LENGTH = 180;
 const MAX_ATTEMPTS = 2;
-const GEMINI_TIMEOUT_MS = 5_000;
+const GEMINI_TIMEOUT_MS = 14_000;
 const GEMINI_MODEL = "gemini-3.1-flash-lite";
 
 const ACTION_NAMES = [
