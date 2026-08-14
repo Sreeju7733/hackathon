@@ -268,7 +268,38 @@ export default function Home() {
     });
     recognitionTimer.current = setTimeout(() => {
       if (request !== recognitionRequest.current) return;
-      if (useAiRecognition) return;
+      if (useAiRecognition) {
+        setAiState({ status: "loading", request });
+        setRecognition({ ...empty, error: "Gemini is decoding your air-drawn equation…" });
+        const controller = new AbortController();
+        recognitionAbort.current = controller;
+        const base = recognizeStrokes(next, corrections);
+        void recognizeWithGemini(next, controller.signal)
+          .then((result) => {
+            if (request !== recognitionRequest.current) return;
+            const resolved = applyGeminiResult(base, result);
+            setRecognition(resolved);
+            setLastExpression(resolved);
+            setAiState({ status: "result", request });
+            if (resolved.graphable) {
+              commitEquation(resolved);
+            }
+          })
+          .catch((error: Error) => {
+            if (controller.signal.aborted) return;
+            if (request !== recognitionRequest.current) return;
+            setRecognition({
+              ...base,
+              error: error.message || "Gemini could not read this equation.",
+            });
+            setAiState({
+              status: "error",
+              request,
+              message: error.message || "Gemini could not read this equation.",
+            });
+          });
+        return;
+      }
       const base = recognizeStrokes(next, corrections);
       setRecognition(base);
       setAiState({ status: "loading", request });
@@ -287,7 +318,7 @@ export default function Home() {
               message: "Offline recognition failed.",
             });
         });
-    }, 1000);
+    }, 1200);
   };
 
   const correct = (value: string) => {
