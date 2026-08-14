@@ -36,7 +36,11 @@ class Narrator {
   }
   setPreferences(next: Partial<NarrationPreferences>) {
     this.preferences = { ...this.preferences, ...next };
-    localStorage.setItem(KEY, JSON.stringify(this.preferences));
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(KEY, JSON.stringify(this.preferences));
+      }
+    } catch {}
   }
   async voices(): Promise<SpeechSynthesisVoice[]> {
     if (!("speechSynthesis" in window))

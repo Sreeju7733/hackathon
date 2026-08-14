@@ -150,7 +150,11 @@ export default function Home() {
   );
   const [lastExpression, setLastExpression] = useState<RecognitionResult | null>(null);
   const [formulaLessonError, setFormulaLessonError] = useState("");
+  const [graphLessonError, setGraphLessonError] = useState("");
   const [libraryOpen, setLibraryOpen] = useState(false);
+  const [loadSignal, setLoadSignal] = useState(0);
+  const [loadStrokes, setLoadStrokes] = useState<Stroke[]>([]);
+  const [airInputMode, setAirInputMode] = useState<"camera" | "whiteboard">("camera");
   const [librarySessions, setLibrarySessions] = useState<LibrarySession[]>([]);
   const [libraryHydrated, setLibraryHydrated] = useState(false);
   const [gestures, setGestures] = useState<GestureSettings>(defaultGestures);
@@ -359,6 +363,7 @@ export default function Home() {
     if (mode === "graph") setGraphLesson(null);
     setLessonStatus("generating");
     setFormulaLessonError("");
+    setGraphLessonError("");
     void generateExplanation({
       latex: result.latex,
       canonicalExpression: result.canonicalExpression,
@@ -411,6 +416,8 @@ export default function Home() {
           setFormulaLessonError(
             error.message || "Formula lesson could not be generated.",
           );
+        else
+          setGraphLessonError(error.message || "Graph explanation could not be generated.");
       })
       .finally(() => lessonRequests.current.delete(requestKey));
   };
@@ -489,7 +496,7 @@ export default function Home() {
     );
     setSelectionActive(false);
     setSelectedNumberIndex(0);
-    setClearSignal((value) => value + 1);
+    if (airInputMode !== "whiteboard") setClearSignal((value) => value + 1);
     setRecognition(empty);
     return true;
   };
@@ -656,7 +663,8 @@ export default function Home() {
             saveProfile(updated);
           }
         }
-        if (!commitEquation(resolved)) setAiState({ status: "result", request });
+        commitEquation(resolved);
+        setAiState({ status: "result", request });
       })
       .catch((error: Error) => {
         if (controller.signal.aborted) return;
@@ -966,6 +974,9 @@ export default function Home() {
           )}
           <AirCanvas
             clearSignal={clearSignal}
+            loadSignal={loadSignal}
+            loadStrokes={loadStrokes}
+            onInputModeChange={setAirInputMode}
             preferredHand={preferredHand}
             interactionMode={interactionMode}
             selectedValue={selectedNumber}
@@ -1126,6 +1137,10 @@ export default function Home() {
             onResetView={() =>
               setGraphView(fitViewport(graphPaths.map((path) => path.trace)))
             }
+            onGraphPan={(x, y) => setGraphView((view) => panViewport(view, x, y))}
+            onGraphScale={(factor) =>
+              setGraphView((view) => zoomViewport(view, factor))
+            }
             onToggleInteractionMode={() =>
               setInteractionMode((current) =>
                 current === "canvas" ? "move" : "canvas",
@@ -1145,6 +1160,20 @@ export default function Home() {
               )
             }
             explanationLoading={lessonStatus === "generating"}
+            explanationError={graphLessonError}
+            onRetryExplain={() =>
+              lastEquation &&
+              prepareLesson(
+                {
+                  ...empty,
+                  latex: lastEquation.latex,
+                  canonicalExpression: lastEquation.canonicalExpression,
+                  valid: true,
+                },
+                "graph",
+                true,
+              )
+            }
             lesson={graphLesson}
             onLessonPause={playGraphNarration}
             onLessonNext={() =>
@@ -1250,31 +1279,7 @@ export default function Home() {
           }
           onRestore={(session) => {
             if (session.kind === "graph") {
-              const canonical = normalizeCanonicalExpression(
-                session.canonicalExpression,
-              );
-              const traces = canonical.ok ? sampleExpression(canonical.value) : [];
-              setEquations((items) => [
-                ...items,
-                {
-                  id: crypto.randomUUID(),
-                  latex: session.latex,
-                  canonicalExpression: canonical.ok
-                    ? canonical.value
-                    : session.canonicalExpression,
-                  color: EQUATION_COLORS[items.length % EQUATION_COLORS.length],
-                  visible: true,
-                  traces,
-                },
-              ]);
-              setLastExpression({
-                ...empty,
-                latex: session.latex,
-                canonicalExpression: canonical.ok
-                  ? canonical.value
-                  : session.canonicalExpression,
-                valid: true,
-              });
+              setWorkspaceMode("maths");
               if (session.explanation?.mode === "graph") {
                 setGraphLesson({
                   plan: session.explanation,
@@ -1282,10 +1287,15 @@ export default function Home() {
                   playing: false,
                 });
               }
-            } else if (session.explanation) {
-              setWorkspaceMode("others");
-              setPhysicsStep(0);
-              setLesson(session.explanation);
+            } else {
+              setWorkspaceMode("maths");
+              if (session.explanation) {
+                setFormulaLessonError("");
+              }
+            }
+            if (session.strokes?.length) {
+              setLoadStrokes(session.strokes);
+              setLoadSignal((value) => value + 1);
             }
             setLibraryOpen(false);
           }}

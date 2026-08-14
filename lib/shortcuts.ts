@@ -94,13 +94,14 @@ export const SHORTCUT_REGISTRY: ShortcutDefinition[] = [
 ];
 
 export function isTargetEditable(target: EventTarget | null): boolean {
-  if (!target || !(target instanceof HTMLElement)) return false;
-  const tagName = target.tagName.toLowerCase();
+  if (!target) return false;
+  const element = target as unknown as Record<string, unknown>;
+  const tagName = typeof element.tagName === "string" ? element.tagName.toLowerCase() : "";
   return (
     tagName === "input" ||
     tagName === "textarea" ||
     tagName === "select" ||
-    target.isContentEditable
+    Boolean(element.isContentEditable)
   );
 }
 

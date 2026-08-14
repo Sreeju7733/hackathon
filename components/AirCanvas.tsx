@@ -36,6 +36,8 @@ export type GestureSettings = {
 };
 type Props = {
   clearSignal: number;
+  loadSignal?: number;
+  loadStrokes?: Stroke[];
   preferredHand: "Left" | "Right";
   eraserRadius?: number;
   interactionMode: "canvas" | "move";
@@ -48,6 +50,7 @@ type Props = {
   onStatusChange: (mode: "hover" | "drawing" | "erasing" | "moving") => void;
   onAction: (action: AirAction) => void;
   onInteractionModeChange: (mode: "canvas" | "move") => void;
+  onInputModeChange?: (mode: "camera" | "whiteboard") => void;
   onGraphPan: (dx: number, dy: number) => void;
   onGraphScale: (scale: number) => void;
   onHideLastEquation: () => void;
@@ -77,6 +80,8 @@ const strokeTouches = (stroke: Stroke, cursor: Point, radius: number) => {
 
 export function AirCanvas({
   clearSignal,
+  loadSignal,
+  loadStrokes,
   preferredHand,
   eraserRadius = 28,
   interactionMode,
@@ -89,6 +94,7 @@ export function AirCanvas({
   onStatusChange,
   onAction,
   onInteractionModeChange,
+  onInputModeChange,
   onGraphPan,
   onGraphScale,
   onHideLastEquation,
@@ -161,6 +167,9 @@ export function AirCanvas({
   const whiteboardErasing = whiteboardTool === "erase";
   const drawingPointerIdRef = useRef<number | null>(null);
   const panPointRef = useRef<Point | null>(null);
+  useEffect(() => {
+    onInputModeChange?.(inputMode);
+  }, [inputMode, onInputModeChange]);
   useEffect(() => {
     callbacksRef.current = {
       onStrokeComplete,
@@ -854,6 +863,22 @@ export function AirCanvas({
   useEffect(() => {
     clearCanvas();
   }, [clearSignal, drawCursor, renderStrokes]);
+  useEffect(() => {
+    if (!loadSignal || !loadStrokes?.length) return;
+    if (cameraEnabledRef.current) turnOffCamera();
+    setInputMode("whiteboard");
+    snapshot();
+    strokesRef.current = loadStrokes.map((stroke) => ({
+      ...stroke,
+      points: stroke.points.map((p) => ({ ...p })),
+      erased: false,
+    }));
+    activeRef.current = [];
+    renderStrokes();
+    drawCursor();
+    emit();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loadSignal]);
   useEffect(
     () => () => {
       cameraEnabledRef.current = false;

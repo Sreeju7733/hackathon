@@ -854,6 +854,12 @@ html[data-workspace-transition="others-to-maths"]::view-transition-new(lesson-su
   border-radius: var(--radius);
   overflow: hidden;
   background: #fff;
+  touch-action: none;
+  cursor: grab;
+}
+
+.graph-wrap:active {
+  cursor: grabbing;
 }
 
 .graph {

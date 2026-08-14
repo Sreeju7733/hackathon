@@ -36,7 +36,24 @@ export function normalizeCanonicalExpression(
     .replace(/[XY]/g, (variable) => variable.toLowerCase())
     .toLowerCase();
 
-  const sides = value.split("=");
+  let sides = value.split("=");
+  if (sides.length === 1) {
+    if (value.includes("x") && !value.includes("y")) {
+      value = `y=${value}`;
+      sides = ["y", sides[0]];
+    } else if (value.includes("x") && value.includes("y")) {
+      value = `y=-(${value.replace(/\+?y/g, "")})`;
+      sides = value.split("=");
+      if (sides.length !== 2) {
+        value = `${value}=0`;
+        sides = [value.slice(0, -2), "0"];
+      }
+    } else if (value.includes("y") && !value.includes("x")) {
+      value = `${value}=0`;
+      sides = [value.slice(0, -2), "0"];
+    }
+  }
+
   if (sides.length !== 2 || !sides[0] || !sides[1])
     return {
       ok: false,

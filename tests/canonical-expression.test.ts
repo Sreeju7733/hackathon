@@ -30,10 +30,14 @@ test("normalizes graphable Gemini output", () => {
 });
 
 test("rejects unsupported and malformed expressions", () => {
-  assert.equal(normalizeCanonicalExpression("x^2").ok, false);
+  assert.deepEqual(normalizeCanonicalExpression("x^2"), {
+    ok: true,
+    value: "y=x^2",
+  });
   assert.equal(normalizeCanonicalExpression("y=unknown(x)").ok, false);
   assert.equal(normalizeCanonicalExpression("x=y=1").ok, false);
   assert.equal(normalizeCanonicalExpression("x=(y+1").ok, false);
   assert.equal(normalizeCanonicalExpression("1=1").ok, false);
+  assert.equal(normalizeCanonicalExpression("unknown+variable").ok, false);
   assert.equal(normalizeCanonicalExpression(null).ok, false);
 });

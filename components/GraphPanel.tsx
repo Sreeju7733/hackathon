@@ -83,10 +83,14 @@ type Props = {
   onResetView: () => void;
   onExplain: () => void;
   explanationLoading: boolean;
+  explanationError?: string;
+  onRetryExplain?: () => void;
   lesson: { plan: ExplanationPlan; current: number; playing: boolean } | null;
   onLessonPause: () => void;
   onLessonNext: () => void;
   onLessonClose: () => void;
+  onGraphPan: (dx: number, dy: number) => void;
+  onGraphScale: (factor: number) => void;
 };
 
 const gridStep = (span: number) => (span <= 20 ? 1 : span <= 50 ? 2 : 5);
@@ -108,11 +112,64 @@ export function GraphPanel({
   onResetView,
   onExplain,
   explanationLoading,
+  explanationError,
+  onRetryExplain,
   lesson,
   onLessonPause,
   onLessonNext,
   onLessonClose,
+  onGraphPan,
+  onGraphScale,
 }: Props) {
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const pointersRef = useRef(new Map<number, { x: number; y: number }>());
+  const dragPointRef = useRef<{ x: number; y: number } | null>(null);
+  const pinchDistanceRef = useRef<number | null>(null);
+  const relativePoint = (event: React.PointerEvent) => {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * GRAPH_WIDTH,
+      y: ((event.clientY - rect.top) / rect.height) * GRAPH_HEIGHT,
+    };
+  };
+  const handlePointerDown = (event: React.PointerEvent) => {
+    (event.target as Element).setPointerCapture(event.pointerId);
+    pointersRef.current.set(event.pointerId, relativePoint(event));
+    if (pointersRef.current.size >= 2) {
+      dragPointRef.current = null;
+      const [a, b] = [...pointersRef.current.values()];
+      pinchDistanceRef.current = Math.hypot(a.x - b.x, a.y - b.y);
+    } else {
+      pinchDistanceRef.current = null;
+      dragPointRef.current = relativePoint(event);
+    }
+  };
+  const handlePointerMove = (event: React.PointerEvent) => {
+    if (!pointersRef.current.has(event.pointerId)) return;
+    pointersRef.current.set(event.pointerId, relativePoint(event));
+    if (pointersRef.current.size >= 2) {
+      const [a, b] = [...pointersRef.current.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinchDistanceRef.current) onGraphScale(dist / pinchDistanceRef.current);
+      pinchDistanceRef.current = dist;
+      return;
+    }
+    const point = relativePoint(event);
+    if (dragPointRef.current)
+      onGraphPan(point.x - dragPointRef.current.x, point.y - dragPointRef.current.y);
+    dragPointRef.current = point;
+  };
+  const handlePointerUp = (event: React.PointerEvent) => {
+    pointersRef.current.delete(event.pointerId);
+    if (pointersRef.current.size < 2) pinchDistanceRef.current = null;
+    dragPointRef.current =
+      pointersRef.current.size === 1 ? [...pointersRef.current.values()][0] : null;
+  };
+  const handleWheel = (event: React.WheelEvent) => {
+    event.preventDefault();
+    onGraphScale(event.deltaY < 0 ? 1.08 : 0.93);
+  };
   const origin = graphPoint({ x: 0, y: 0 }, graphView);
   const verticalGrid = gridValues(graphView.centerX, graphView.spanX);
   const horizontalGrid = gridValues(graphView.centerY, graphView.spanY);
@@ -158,7 +215,21 @@ export function GraphPanel({
           </button>
         </div>
       </div>
-      <div className="graph-wrap">
+      {explanationError && !lesson && (
+        <div className="lesson-error">
+          <span>{explanationError}</span>
+          {onRetryExplain && <button onClick={onRetryExplain}>Retry explanation</button>}
+        </div>
+      )}
+      <div
+        className="graph-wrap"
+        ref={wrapRef}
+        onWheel={handleWheel}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
         <svg className="graph" viewBox={`0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`}>
           {verticalGrid.map((value) => {
             const x = graphPoint({ x: value, y: 0 }, graphView).x;

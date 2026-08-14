@@ -56,61 +56,73 @@ export async function POST(request: Request) {
     )
       return NextResponse.json({ error: "Invalid stroke image." }, { status: 400 });
     const base64 = body.image.slice(body.image.indexOf(",") + 1);
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/" +
-        "gemini-3.1-flash-lite:generateContent?key=" +
-        encodeURIComponent(process.env.GEMINI_API_KEY),
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                { text: instruction },
-                { inline_data: { mime_type: "image/png", data: base64 } },
-              ],
-            },
+    const requestBody = JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [
+            { text: instruction },
+            { inline_data: { mime_type: "image/png", data: base64 } },
           ],
-          generationConfig: {
-            maxOutputTokens: 160,
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: "OBJECT",
-              properties: {
-                latex: {
-                  type: "STRING",
-                  description: "The recognized equation in LaTeX.",
-                },
-                canonicalExpression: {
-                  type: "STRING",
-                  description:
-                    "A concise mathematical expression. Use plain notation when possible; Greek letters and formula notation are allowed.",
-                },
-                confidence: {
-                  type: "NUMBER",
-                  description: "A number from 0 to 1.",
-                },
-                recommendedMode: { type: "STRING", enum: ["graph", "formula"] },
-                classificationConfidence: {
-                  type: "NUMBER",
-                  description: "A number from 0 to 1.",
-                },
-              },
-              required: [
-                "latex",
-                "canonicalExpression",
-                "confidence",
-                "recommendedMode",
-                "classificationConfidence",
-              ],
+        },
+      ],
+      generationConfig: {
+        maxOutputTokens: 160,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: "OBJECT",
+          properties: {
+            latex: {
+              type: "STRING",
+              description: "The recognized equation in LaTeX.",
+            },
+            canonicalExpression: {
+              type: "STRING",
+              description:
+                "A concise mathematical expression. Use plain notation when possible; Greek letters and formula notation are allowed.",
+            },
+            confidence: {
+              type: "NUMBER",
+              description: "A number from 0 to 1.",
+            },
+            recommendedMode: { type: "STRING", enum: ["graph", "formula"] },
+            classificationConfidence: {
+              type: "NUMBER",
+              description: "A number from 0 to 1.",
             },
           },
-        }),
-        signal: AbortSignal.timeout(25_000),
+          required: [
+            "latex",
+            "canonicalExpression",
+            "confidence",
+            "recommendedMode",
+            "classificationConfidence",
+          ],
+        },
       },
-    );
+    });
+    const url =
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
+      "gemini-3.1-flash-lite:generateContent?key=" +
+      encodeURIComponent(process.env.GEMINI_API_KEY);
+    const MAX_ATTEMPTS = 2;
+    let response: Response | null = null;
+    for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+      try {
+        response = await fetch(url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: requestBody,
+          signal: AbortSignal.timeout(13_000),
+        });
+        if (response.ok || response.status === 429) break;
+        if (attempt === MAX_ATTEMPTS - 1) break;
+      } catch (error) {
+        if (attempt === MAX_ATTEMPTS - 1) throw error;
+        console.error("Gemini recognition attempt failed, retrying", error);
+      }
+    }
+    if (!response) throw new Error("Gemini returned no response");
     if (!response.ok) {
       const detail = (await response.text()).slice(0, 500);
       console.error("Gemini API error", response.status, detail);
