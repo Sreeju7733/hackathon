@@ -263,7 +263,7 @@ export default function Home() {
     setRecognition({
       ...empty,
       error: useAiRecognition
-        ? "Gemini will read the complete equation when you add it."
+        ? "Gemini reads the equation automatically 5s after you stop drawing."
         : "Finish drawing. Local recognition starts after a short pause.",
     });
     recognitionTimer.current = setTimeout(() => {
@@ -281,9 +281,7 @@ export default function Home() {
             setRecognition(resolved);
             setLastExpression(resolved);
             setAiState({ status: "result", request });
-            if (resolved.graphable) {
-              commitEquation(resolved);
-            }
+            commitEquation(resolved);
           })
           .catch((error: Error) => {
             if (controller.signal.aborted) return;
@@ -318,7 +316,7 @@ export default function Home() {
               message: "Offline recognition failed.",
             });
         });
-    }, 1200);
+    }, 5000);
   };
 
   const correct = (value: string) => {
