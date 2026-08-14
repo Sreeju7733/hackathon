@@ -1,0 +1,28 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="112" fill="#0b0f19"/>
+  <circle cx="256" cy="256" r="210" stroke="#1f293d" stroke-width="6"/>
+  <path d="M96 256 H416" stroke="#2a374f" stroke-width="6" stroke-linecap="round"/>
+  <path d="M256 96 V416" stroke="#2a374f" stroke-width="6" stroke-linecap="round"/>
+  <!-- Smooth Parabola Graph Curve -->
+  <path d="M120 380 Q 256 90 392 380" stroke="url(#accentGrad)" stroke-width="20" stroke-linecap="round" fill="none"/>
+  <!-- Glowing Vertex Point -->
+  <circle cx="256" cy="235" r="18" fill="#38bdf8" filter="url(#glow)"/>
+  <circle cx="256" cy="235" r="10" fill="#ffffff"/>
+  <!-- Air-drawing Hand / Sparkle Icon -->
+  <circle cx="340" cy="180" r="8" fill="#f59e0b"/>
+  <circle cx="370" cy="150" r="14" fill="#a855f7"/>
+  <defs>
+    <linearGradient id="accentGrad" x1="120" y1="380" x2="392" y2="380" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#38bdf8"/>
+      <stop offset="0.5" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#c084fc"/>
+    </linearGradient>
+    <filter id="glow" x="220" y="199" width="72" height="72" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
