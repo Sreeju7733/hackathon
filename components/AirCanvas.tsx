@@ -455,8 +455,18 @@ export function AirCanvas({
     }
     lastVideoTimeRef.current = video.currentTime;
     lastDetectionAtRef.current = now;
-    const state = stateRef.current,
+    const state = stateRef.current;
+    let result: ReturnType<typeof detector.detectForVideo> | null = null;
+    try {
       result = detector.detectForVideo(video, now);
+    } catch {
+      frameRef.current = requestAnimationFrame(loop);
+      return;
+    }
+    if (!result) {
+      frameRef.current = requestAnimationFrame(loop);
+      return;
+    }
     const selectedIndex = result.handednesses.findIndex(
       (hand) => hand[0]?.categoryName === state.preferredHand,
     );
