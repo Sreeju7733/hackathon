@@ -179,10 +179,15 @@ export function groupStrokes(strokes: Stroke[]): Stroke[][] {
         centerY = Math.abs(
           (a.bounds.minY + a.bounds.maxY - b.bounds.minY - b.bounds.maxY) / 2,
         );
+      const widthRatio =
+        Math.min(a.bounds.width, b.bounds.width) /
+        Math.max(a.bounds.width, b.bounds.width);
       const equals =
         horizontal(a.bounds) &&
         horizontal(b.bounds) &&
-        xRatio > 0.58 &&
+        xRatio > 0.6 &&
+        widthRatio > 0.45 &&
+        centerY > Math.max(3, Math.min(a.bounds.height, b.bounds.height) * 0.4) &&
         centerY < Math.max(a.bounds.width, b.bounds.width) * 0.42;
       const plus =
         ((horizontal(a.bounds) && vertical(b.bounds)) ||

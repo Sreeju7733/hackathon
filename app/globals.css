@@ -1342,6 +1342,18 @@ html[data-workspace-transition="others-to-maths"]::view-transition-new(lesson-su
   touch-action: none;
 }
 
+.whiteboard-tool-erase .cursor-layer {
+  cursor: cell;
+}
+
+.whiteboard-tool-pan .cursor-layer {
+  cursor: grab;
+}
+
+.whiteboard-tool-pan .cursor-layer:active {
+  cursor: grabbing;
+}
+
 .air-mode-toolbar {
   position: absolute;
   z-index: 6;

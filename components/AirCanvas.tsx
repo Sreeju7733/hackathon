@@ -1,5 +1,6 @@
 "use client";
 import {
+  IconArrowsMove,
   IconCamera,
   IconCameraOff,
   IconEraser,
@@ -154,8 +155,12 @@ export function AirCanvas({
     });
   const [gesturePose, setGesturePose] = useState<GesturePose>("hover");
   const [inputMode, setInputMode] = useState<"camera" | "whiteboard">("camera");
-  const [whiteboardErasing, setWhiteboardErasing] = useState(false);
+  const [whiteboardTool, setWhiteboardTool] = useState<"draw" | "erase" | "pan">(
+    "draw",
+  );
+  const whiteboardErasing = whiteboardTool === "erase";
   const drawingPointerIdRef = useRef<number | null>(null);
+  const panPointRef = useRef<Point | null>(null);
   useEffect(() => {
     callbacksRef.current = {
       onStrokeComplete,
@@ -357,6 +362,21 @@ export function AirCanvas({
       renderStrokes();
     }
   };
+  const panBy = (dx: number, dy: number) => {
+    if (!dx && !dy) return;
+    strokesRef.current = strokesRef.current.map((stroke) => ({
+      ...stroke,
+      points: stroke.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+      bounds: {
+        ...stroke.bounds,
+        minX: stroke.bounds.minX + dx,
+        maxX: stroke.bounds.maxX + dx,
+        minY: stroke.bounds.minY + dy,
+        maxY: stroke.bounds.maxY + dy,
+      },
+    }));
+    renderStrokes();
+  };
   const clearCanvas = () => {
     snapshot();
     strokesRef.current = [];
@@ -376,7 +396,11 @@ export function AirCanvas({
     event.currentTarget.setPointerCapture(event.pointerId);
     drawingPointerIdRef.current = event.pointerId;
     const point = relativePoint(event);
-    if (whiteboardErasing) {
+    if (whiteboardTool === "pan") {
+      panPointRef.current = point;
+      setMode("moving");
+      drawCursor(point, false, true);
+    } else if (whiteboardTool === "erase") {
       eraseAt(point);
       drawCursor(point, true);
     } else {
@@ -391,7 +415,15 @@ export function AirCanvas({
     if (inputMode !== "whiteboard" || drawingPointerIdRef.current !== event.pointerId)
       return;
     const point = relativePoint(event);
-    if (whiteboardErasing) {
+    if (whiteboardTool === "pan") {
+      if (panPointRef.current) {
+        panBy(point.x - panPointRef.current.x, point.y - panPointRef.current.y);
+        panPointRef.current = point;
+      }
+      drawCursor(point, false, true);
+      return;
+    }
+    if (whiteboardTool === "erase") {
       eraseAt(point);
       drawCursor(point, true);
       return;
@@ -406,7 +438,10 @@ export function AirCanvas({
     if (inputMode !== "whiteboard" || drawingPointerIdRef.current !== event.pointerId)
       return;
     drawingPointerIdRef.current = null;
-    if (whiteboardErasing) {
+    if (whiteboardTool === "pan") {
+      panPointRef.current = null;
+      setMode("hover");
+    } else if (whiteboardTool === "erase") {
       eraseSnapshotRef.current = false;
       if (eraseChangedRef.current) {
         eraseChangedRef.current = false;
@@ -423,6 +458,7 @@ export function AirCanvas({
     previousRef.current = null;
     pinchingRef.current = false;
     drawingPointerIdRef.current = null;
+    panPointRef.current = null;
     setMode("hover");
     setInputMode(next);
     drawCursor();
@@ -834,7 +870,7 @@ export function AirCanvas({
       ref={rootRef}
       className={`air-canvas ${interactionMode === "move" ? "move-active" : ""} ${
         whiteboardReady ? "whiteboard-active" : ""
-      }`}
+      } ${whiteboardReady ? `whiteboard-tool-${whiteboardTool}` : ""}`}
     >
       {inputMode === "camera" && (
         <video ref={videoRef} className="camera-feed" muted playsInline />
@@ -870,15 +906,39 @@ export function AirCanvas({
         </div>
         <div className="air-mode-actions">
           {whiteboardReady && (
-            <button
-              type="button"
-              className={whiteboardErasing ? "active" : ""}
-              aria-pressed={whiteboardErasing}
-              title={whiteboardErasing ? "Switch to draw" : "Switch to eraser"}
-              onClick={() => setWhiteboardErasing((value) => !value)}
-            >
-              <IconEraser size={15} />
-            </button>
+            <>
+              <button
+                type="button"
+                className={whiteboardTool === "draw" ? "active" : ""}
+                aria-pressed={whiteboardTool === "draw"}
+                title="Draw"
+                onClick={() => setWhiteboardTool("draw")}
+              >
+                <IconPencil size={15} />
+              </button>
+              <button
+                type="button"
+                className={whiteboardTool === "erase" ? "active" : ""}
+                aria-pressed={whiteboardTool === "erase"}
+                title="Eraser"
+                onClick={() =>
+                  setWhiteboardTool((tool) => (tool === "erase" ? "draw" : "erase"))
+                }
+              >
+                <IconEraser size={15} />
+              </button>
+              <button
+                type="button"
+                className={whiteboardTool === "pan" ? "active" : ""}
+                aria-pressed={whiteboardTool === "pan"}
+                title="Move canvas"
+                onClick={() =>
+                  setWhiteboardTool((tool) => (tool === "pan" ? "draw" : "pan"))
+                }
+              >
+                <IconArrowsMove size={15} />
+              </button>
+            </>
           )}
           <button type="button" title="Clear canvas" onClick={clearCanvas}>
             <IconTrash size={15} />
@@ -912,9 +972,11 @@ export function AirCanvas({
         <div className="whiteboard-hint">
           <IconPointFilled size={13} />
           <span>
-            {whiteboardErasing
+            {whiteboardTool === "erase"
               ? "Drag to erase strokes."
-              : "Click and drag to draw. Use Add to graph when ready."}
+              : whiteboardTool === "pan"
+                ? "Drag to move the whole canvas."
+                : "Click and drag to draw. Use Add to graph when ready."}
           </span>
         </div>
       )}

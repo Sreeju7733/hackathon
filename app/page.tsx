@@ -264,26 +264,25 @@ export default function Home() {
     });
     recognitionTimer.current = setTimeout(() => {
       if (request !== recognitionRequest.current) return;
+      if (useAiRecognition) return;
       const base = recognizeStrokes(next, corrections);
       setRecognition(base);
-      if (!useAiRecognition) {
-        setAiState({ status: "loading", request });
-        void recognizeWithLocalModel(next, corrections, profile)
-          .then((result) => {
-            if (request === recognitionRequest.current) {
-              setRecognition(result);
-              setAiState({ status: "result", request });
-            }
-          })
-          .catch(() => {
-            if (request === recognitionRequest.current)
-              setAiState({
-                status: "error",
-                request,
-                message: "Offline recognition failed.",
-              });
-          });
-      }
+      setAiState({ status: "loading", request });
+      void recognizeWithLocalModel(next, corrections, profile)
+        .then((result) => {
+          if (request === recognitionRequest.current) {
+            setRecognition(result);
+            setAiState({ status: "result", request });
+          }
+        })
+        .catch(() => {
+          if (request === recognitionRequest.current)
+            setAiState({
+              status: "error",
+              request,
+              message: "Offline recognition failed.",
+            });
+        });
     }, 1000);
   };
 
@@ -1059,15 +1058,23 @@ export default function Home() {
                   </span>
                   <div>
                     <button
-                      className={lastExpression.graphable ? "selected" : ""}
-                      disabled={!lastExpression.graphable}
-                      onClick={() => setLesson(null)}
+                      className={workspaceMode === "maths" ? "selected" : ""}
+                      disabled={!lastExpression.graphable && workspaceMode === "maths"}
+                      onClick={() => {
+                        switchWorkspace("maths");
+                        if (lastExpression.graphable) {
+                          commitEquation(lastExpression);
+                        }
+                      }}
                     >
                       Graph
                     </button>
                     <button
-                      className={!lastExpression.graphable ? "selected" : ""}
-                      onClick={() => prepareLesson(lastExpression, "formula", true)}
+                      className={workspaceMode === "others" ? "selected" : ""}
+                      onClick={() => {
+                        switchWorkspace("others");
+                        prepareLesson(lastExpression, "formula", true);
+                      }}
                     >
                       Document
                     </button>
