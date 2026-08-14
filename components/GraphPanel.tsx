@@ -184,7 +184,7 @@ export function GraphPanel({
         trace,
       }))
     : [];
-  const displayedPaths = lesson ? lessonPaths : paths;
+  const displayedPaths = lessonPaths.length ? lessonPaths : paths;
   return (
     <section className="graph-panel">
       <div className="panel-header">

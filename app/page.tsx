@@ -456,7 +456,7 @@ export default function Home() {
       ? { ...result, canonicalExpression: graphInput.value }
       : result;
     const traces = graphInput.ok ? sampleExpression(graphInput.value) : [];
-    if (workspaceMode === "others" || !graphInput.ok) {
+    if (!graphInput.ok) {
       setFormulaCandidate(result);
       setLastExpression(result);
       setLibrarySessions((sessions) => [
@@ -492,6 +492,7 @@ export default function Home() {
       },
     ]);
     setLastExpression(graphResult);
+    setFormulaCandidate(graphResult);
     setLibrarySessions((sessions) => [
       {
         id: crypto.randomUUID(),
@@ -524,10 +525,10 @@ export default function Home() {
     if (airInputMode !== "whiteboard") setClearSignal((value) => value + 1);
     setRecognition(empty);
     // Prepare both the graph explanation and the document view in the same
-    // shot, so Explain and switching to Others are instant instead of each
-    // triggering their own separate generation later.
+    // shot, so both Maths and Others are ready immediately instead of
+    // needing a separate manual trigger for each.
     prepareLesson(graphResult, "graph", false);
-    prepareLesson(graphResult, "formula", false);
+    prepareLesson(graphResult, "formula", true);
     return true;
   };
   const plotFormulaOnGraph = () => {
