@@ -1,5 +1,5 @@
 // In development mode, network-first to ensure live CSS and chunks are never stale
-const CACHE_NAME = "sign2graph-v2";
+const CACHE_NAME = "plotlyx-v2";
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

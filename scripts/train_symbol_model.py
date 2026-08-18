@@ -1,4 +1,4 @@
-"""Train the compact local sign2graph symbol classifier and export ONNX.
+"""Train the compact local plotlyx symbol classifier and export ONNX.
 
 Install: pip install torch torchvision pillow numpy onnx
 Run: python scripts/train_symbol_model.py --samples 500 --epochs 12

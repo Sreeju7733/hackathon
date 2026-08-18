@@ -6,7 +6,7 @@ export type NarrationStatus =
   | "paused"
   | "error";
 
-const KEY = "sign2graph-narrator-v1";
+const KEY = "plotlyx-narrator-v1";
 const defaults: NarrationPreferences = { voiceURI: "", rate: 0.93, volume: 1 };
 
 class Narrator {

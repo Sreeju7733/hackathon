@@ -177,13 +177,13 @@ export default function Home() {
       setCorrections(JSON.parse(localStorage.getItem("airgraph-corrections") || "{}"));
       const saved = JSON.parse(localStorage.getItem("airgraph-gestures") || "null");
       if (saved) setGestures({ ...defaultGestures, ...saved });
-      const savedMode = localStorage.getItem("sign2graph-workspace-mode");
+      const savedMode = localStorage.getItem("plotlyx-workspace-mode");
       if (savedMode === "maths" || savedMode === "others") setWorkspaceMode(savedMode);
-      const savedSubject = localStorage.getItem("sign2graph-explanation-subject");
+      const savedSubject = localStorage.getItem("plotlyx-explanation-subject");
       if (SUBJECT_OPTIONS.includes(savedSubject as SubjectOption)) {
         setSubjectOption(savedSubject as SubjectOption);
       }
-      setCustomSubject(localStorage.getItem("sign2graph-custom-subject") || "");
+      setCustomSubject(localStorage.getItem("plotlyx-custom-subject") || "");
     } catch {}
     setProfile(loadProfile());
     setLibrarySessions(loadLibrary());
@@ -203,15 +203,15 @@ export default function Home() {
       .catch((error: Error) => setNarrationStatus(error.message));
   }, []);
   useEffect(
-    () => localStorage.setItem("sign2graph-workspace-mode", workspaceMode),
+    () => localStorage.setItem("plotlyx-workspace-mode", workspaceMode),
     [workspaceMode],
   );
   useEffect(
-    () => localStorage.setItem("sign2graph-explanation-subject", subjectOption),
+    () => localStorage.setItem("plotlyx-explanation-subject", subjectOption),
     [subjectOption],
   );
   useEffect(
-    () => localStorage.setItem("sign2graph-custom-subject", customSubject),
+    () => localStorage.setItem("plotlyx-custom-subject", customSubject),
     [customSubject],
   );
   useEffect(() => {
@@ -936,7 +936,7 @@ export default function Home() {
                 onClick={() =>
                   void narrator
                     .speak(
-                      "This is a Sign2Graph voice test. If you can hear this, narration is ready.",
+                      "This is a PlotlyX voice test. If you can hear this, narration is ready.",
                     )
                     .then(() => setNarrationStatus("Voice test completed."))
                     .catch(() => undefined)

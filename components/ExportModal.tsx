@@ -51,11 +51,11 @@ export function ExportModal({ isOpen, onClose, equations, viewport }: ExportModa
 
   const handleDownload = () => {
     if (tab === "svg") {
-      downloadBlob(svgContent, "sign2graph-export.svg", "image/svg+xml");
+      downloadBlob(svgContent, "plotlyx-export.svg", "image/svg+xml");
     } else if (tab === "latex") {
       downloadBlob(latexContent, "equations.tex", "text/plain");
     } else {
-      downloadBlob(jsonContent, "sign2graph-session.json", "application/json");
+      downloadBlob(jsonContent, "plotlyx-session.json", "application/json");
     }
   };
 

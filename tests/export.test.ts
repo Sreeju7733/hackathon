@@ -56,7 +56,7 @@ test("exportToLatexBundle serializes only visible equations", () => {
 test("exportToDataJson outputs valid JSON bundle with version and viewport", () => {
   const raw = exportToDataJson(mockEquations, DEFAULT_VIEWPORT);
   const parsed = JSON.parse(raw);
-  assert.equal(parsed.app, "Sign2Graph");
+  assert.equal(parsed.app, "PlotlyX");
   assert.equal(parsed.version, "1.0");
   assert.equal(parsed.equations.length, 2);
   assert.equal(parsed.equations[0].id, "eq-1");

@@ -13,7 +13,7 @@ export type LibrarySession = {
   explanation?: ExplanationPlan;
 };
 
-const KEY = "sign2graph-library-v1";
+const KEY = "plotlyx-library-v1";
 
 export function loadLibrary(): LibrarySession[] {
   try {
