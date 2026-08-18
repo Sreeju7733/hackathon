@@ -18,6 +18,8 @@ import {
   IconMenu2,
   IconMath,
   IconAtom2,
+  IconDownload,
+  IconKeyboard,
 } from "@tabler/icons-react";
 import { AirCanvas, type GestureSettings } from "../components/AirCanvas";
 import { EquationSidebar } from "../components/EquationSidebar";
@@ -25,6 +27,8 @@ import { GraphPanel } from "../components/GraphPanel";
 import { MathPreview } from "../components/MathPreview";
 import { PhysicsPanel } from "../components/PhysicsPanel";
 import { LibraryPanel } from "../components/LibraryPanel";
+import { ExportModal } from "../components/ExportModal";
+import { ShortcutModal } from "../components/ShortcutModal";
 import { loadLibrary, saveLibrary, type LibrarySession } from "../lib/library";
 import { generateExplanation } from "../lib/explore-client";
 import {
@@ -135,6 +139,8 @@ export default function Home() {
   const [selectedNumberIndex, setSelectedNumberIndex] = useState(0);
   const [graphView, setGraphView] = useState(DEFAULT_VIEWPORT);
   const [tutorialOpen, setTutorialOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [lesson, setLesson] = useState<ExplanationPlan | null>(null);
   const [graphLesson, setGraphLesson] = useState<{
     plan: ExplanationPlan;
