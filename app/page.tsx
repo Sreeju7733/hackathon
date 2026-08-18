@@ -790,8 +790,24 @@ export default function Home() {
           </button>
         </div>
         <div className="topbar-actions">
+          <button
+            className="header-link"
+            title="Keyboard shortcuts (Ctrl+/)"
+            onClick={() => setShortcutsOpen(true)}
+          >
+            <IconKeyboard size={17} />
+            Shortcuts
+          </button>
+          <button
+            className="header-link"
+            title="Export graph & LaTeX"
+            onClick={() => setExportOpen(true)}
+          >
+            <IconDownload size={17} />
+            Export
+          </button>
           <button className="header-link" onClick={() => setTutorialOpen(true)}>
-            <IconHelpCircle size={18} />
+            <IconHelpCircle size={17} />
             Help
           </button>
           <span className="connection">
@@ -1347,6 +1363,16 @@ export default function Home() {
           }}
         />
       )}
+      <ExportModal
+        isOpen={exportOpen}
+        onClose={() => setExportOpen(false)}
+        equations={equations}
+        viewport={graphView}
+      />
+      <ShortcutModal
+        isOpen={shortcutsOpen}
+        onClose={() => setShortcutsOpen(false)}
+      />
     </main>
   );
 }
