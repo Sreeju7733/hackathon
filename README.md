@@ -4,6 +4,9 @@ PlotlyX is a web-based AI and computer-vision learning tool that turns an
 air-written mathematical or scientific expression into either an interactive
 graph or a structured formula lesson.
 
+<img width="3819" height="2778" alt="image" src="https://github.com/user-attachments/assets/c469445e-b7c0-4bdb-aa14-802af6daeeda" />
+
+
 # PlotlyX System Architecture
 
 PlotlyX is an intelligent air-canvas math recognition and graphing platform combining real-time computer vision, hybrid machine learning, symbolic math evaluation, and responsive reactive visualization.
